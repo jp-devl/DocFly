@@ -10,11 +10,17 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ApiParseDocumentRouteImport } from './routes/api/parse-document'
 import { Route as ApiVoiceFillRouteImport } from './routes/api/voice-fill'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiParseDocumentRoute = ApiParseDocumentRouteImport.update({
+  id: '/api/parse-document',
+  path: '/api/parse-document',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiVoiceFillRoute = ApiVoiceFillRouteImport.update({
@@ -25,27 +31,31 @@ const ApiVoiceFillRoute = ApiVoiceFillRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/api/parse-document': typeof ApiParseDocumentRoute
   '/api/voice-fill': typeof ApiVoiceFillRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/api/parse-document': typeof ApiParseDocumentRoute
   '/api/voice-fill': typeof ApiVoiceFillRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/api/parse-document': typeof ApiParseDocumentRoute
   '/api/voice-fill': typeof ApiVoiceFillRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/api/voice-fill'
+  fullPaths: '/' | '/api/parse-document' | '/api/voice-fill'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/api/voice-fill'
-  id: '__root__' | '/' | '/api/voice-fill'
+  to: '/' | '/api/parse-document' | '/api/voice-fill'
+  id: '__root__' | '/' | '/api/parse-document' | '/api/voice-fill'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  ApiParseDocumentRoute: typeof ApiParseDocumentRoute
   ApiVoiceFillRoute: typeof ApiVoiceFillRoute
 }
 
@@ -56,6 +66,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/parse-document': {
+      id: '/api/parse-document'
+      path: '/api/parse-document'
+      fullPath: '/api/parse-document'
+      preLoaderRoute: typeof ApiParseDocumentRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/voice-fill': {
@@ -70,18 +87,9 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  ApiParseDocumentRoute: ApiParseDocumentRoute,
   ApiVoiceFillRoute: ApiVoiceFillRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
