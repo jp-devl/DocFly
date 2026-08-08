@@ -45,7 +45,8 @@ export const Route = createFileRoute("/api/voice-fill")({
           });
         }
 
-        const fields = ALL_FIELDS.filter((f) => !sectionId || sectionId === "all" || true);
+        const fields = ALL_FIELDS;
+        void sectionId;
         const fieldSpec = fields
           .map((f) => {
             const opts = f.options ? ` | valores possíveis: ${f.options.join(" / ")}` : "";
