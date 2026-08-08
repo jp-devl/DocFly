@@ -40,35 +40,36 @@ export function normalizarEstrutura(input: unknown): Estrutura {
   input.forEach((raw, i) => {
     if (!raw || typeof raw !== "object") return;
     const s = raw as Record<string, unknown>;
-    const camposRaw = Array.isArray(s.campos) ? s.campos : [];
+    const camposRaw = Array.isArray(s["campos"]) ? (s["campos"] as unknown[]) : [];
     const campos: Campo[] = [];
 
     camposRaw.forEach((c, j) => {
       if (!c || typeof c !== "object") return;
       const f = c as Record<string, unknown>;
-      const rotulo = String(f.rotulo ?? "").trim();
+      const rotulo = String(f["rotulo"] ?? "").trim();
       if (!rotulo) return;
-      let chave = slug(String(f.chave ?? rotulo), `campo_${i}_${j}`);
+      let chave = slug(String(f["chave"] ?? rotulo), `campo_${i}_${j}`);
       while (usadas.has(chave)) chave = `${chave}_${j}`;
       usadas.add(chave);
-      const tipo = TIPOS.includes(f.tipo as TipoCampo) ? (f.tipo as TipoCampo) : "texto";
-      const opcoes = Array.isArray(f.opcoes)
-        ? f.opcoes.map((o) => String(o)).filter(Boolean).slice(0, 8)
+      const tipo = TIPOS.includes(f["tipo"] as TipoCampo) ? (f["tipo"] as TipoCampo) : "texto";
+      const opcoes = Array.isArray(f["opcoes"])
+        ? (f["opcoes"] as unknown[]).map((o) => String(o)).filter(Boolean).slice(0, 8)
         : undefined;
       campos.push({
         chave,
         rotulo: rotulo.slice(0, 120),
         tipo: tipo === "opcao" && (!opcoes || opcoes.length < 2) ? "texto" : tipo,
         ...(opcoes && opcoes.length >= 2 ? { opcoes } : {}),
-        ...(f.longo === true ? { longo: true } : {}),
+        ...(f["longo"] === true ? { longo: true } : {}),
       });
     });
 
     if (campos.length === 0) return;
     secoes.push({
-      id: slug(String(s.id ?? s.titulo ?? ""), `secao_${i}`),
-      titulo: String(s.titulo ?? `Seção ${i + 1}`).slice(0, 100),
-      dica: String(s.dica ?? "Fale os dados desta parte do documento.").slice(0, 240),
+      id: slug(String(s["id"] ?? s["titulo"] ?? ""), `secao_${i}`),
+      titulo: String(s["titulo"] ?? `Seção ${i + 1}`).slice(0, 100),
+      dica: String(s["dica"] ?? "Fale os dados desta parte do documento.").slice(0, 240),
+
       campos,
     });
   });
