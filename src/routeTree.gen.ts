@@ -10,11 +10,35 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
+import { Route as AuthRouteImport } from './routes/auth'
+import { Route as AuthenticatedModelosRouteImport } from './routes/_authenticated/modelos'
+import { Route as ApiParseDocumentRouteImport } from './routes/api/parse-document'
 import { Route as ApiVoiceFillRouteImport } from './routes/api/voice-fill'
+import { Route as AuthenticatedModeloIdRouteImport } from './routes/_authenticated/modelo.$id'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
+  id: '/_authenticated',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthRoute = AuthRouteImport.update({
+  id: '/auth',
+  path: '/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedModelosRoute = AuthenticatedModelosRouteImport.update({
+  id: '/modelos',
+  path: '/modelos',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const ApiParseDocumentRoute = ApiParseDocumentRouteImport.update({
+  id: '/api/parse-document',
+  path: '/api/parse-document',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiVoiceFillRoute = ApiVoiceFillRouteImport.update({
@@ -22,30 +46,71 @@ const ApiVoiceFillRoute = ApiVoiceFillRouteImport.update({
   path: '/api/voice-fill',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedModeloIdRoute = AuthenticatedModeloIdRouteImport.update({
+  id: '/modelo/$id',
+  path: '/modelo/$id',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
+  '/modelos': typeof AuthenticatedModelosRoute
+  '/api/parse-document': typeof ApiParseDocumentRoute
   '/api/voice-fill': typeof ApiVoiceFillRoute
+  '/modelo/$id': typeof AuthenticatedModeloIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
+  '/modelos': typeof AuthenticatedModelosRoute
+  '/api/parse-document': typeof ApiParseDocumentRoute
   '/api/voice-fill': typeof ApiVoiceFillRoute
+  '/modelo/$id': typeof AuthenticatedModeloIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
+  '/auth': typeof AuthRoute
+  '/_authenticated/modelos': typeof AuthenticatedModelosRoute
+  '/api/parse-document': typeof ApiParseDocumentRoute
   '/api/voice-fill': typeof ApiVoiceFillRoute
+  '/_authenticated/modelo/$id': typeof AuthenticatedModeloIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/api/voice-fill'
+  fullPaths:
+    | '/'
+    | '/auth'
+    | '/modelos'
+    | '/api/parse-document'
+    | '/api/voice-fill'
+    | '/modelo/$id'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/api/voice-fill'
-  id: '__root__' | '/' | '/api/voice-fill'
+  to:
+    | '/'
+    | '/auth'
+    | '/modelos'
+    | '/api/parse-document'
+    | '/api/voice-fill'
+    | '/modelo/$id'
+  id:
+    | '__root__'
+    | '/'
+    | '/_authenticated'
+    | '/auth'
+    | '/_authenticated/modelos'
+    | '/api/parse-document'
+    | '/api/voice-fill'
+    | '/_authenticated/modelo/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
+  AuthRoute: typeof AuthRoute
+  ApiParseDocumentRoute: typeof ApiParseDocumentRoute
   ApiVoiceFillRoute: typeof ApiVoiceFillRoute
 }
 
@@ -58,6 +123,34 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated': {
+      id: '/_authenticated'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AuthenticatedRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated/modelos': {
+      id: '/_authenticated/modelos'
+      path: '/modelos'
+      fullPath: '/modelos'
+      preLoaderRoute: typeof AuthenticatedModelosRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/api/parse-document': {
+      id: '/api/parse-document'
+      path: '/api/parse-document'
+      fullPath: '/api/parse-document'
+      preLoaderRoute: typeof ApiParseDocumentRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/voice-fill': {
       id: '/api/voice-fill'
       path: '/api/voice-fill'
@@ -65,23 +158,36 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiVoiceFillRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/modelo/$id': {
+      id: '/_authenticated/modelo/$id'
+      path: '/modelo/$id'
+      fullPath: '/modelo/$id'
+      preLoaderRoute: typeof AuthenticatedModeloIdRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
   }
 }
 
+interface AuthenticatedRouteRouteChildren {
+  AuthenticatedModelosRoute: typeof AuthenticatedModelosRoute
+  AuthenticatedModeloIdRoute: typeof AuthenticatedModeloIdRoute
+}
+
+const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedModelosRoute: AuthenticatedModelosRoute,
+  AuthenticatedModeloIdRoute: AuthenticatedModeloIdRoute,
+}
+
+const AuthenticatedRouteRouteWithChildren =
+  AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
+  AuthRoute: AuthRoute,
+  ApiParseDocumentRoute: ApiParseDocumentRoute,
   ApiVoiceFillRoute: ApiVoiceFillRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
