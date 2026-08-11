@@ -7,6 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { cabecalhoAuth } from "@/lib/sessao";
 import { normalizarEstrutura, type Estrutura } from "@/lib/estrutura";
 import { MODELO_EXEMPLO } from "@/lib/modelo-exemplo";
+import { mensagemErro } from "@/lib/erros";
 
 export const Route = createFileRoute("/_authenticated/modelos")({
   head: () => ({
@@ -101,7 +102,7 @@ function Modelos() {
       toast.success("Formulário criado! Agora é só falar.");
       void navigate({ to: "/modelo/$id", params: { id: novo.id } });
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Não consegui processar esse documento.");
+      toast.error(mensagemErro(err, "Não consegui processar esse documento."));
     } finally {
       setEnviando(false);
       setEtapa("");
