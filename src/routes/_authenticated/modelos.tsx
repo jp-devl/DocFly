@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
-import { FileUp, Loader2, LogOut, Sparkles, Trash2, FileText } from "lucide-react";
+import { FileUp, LogOut, Sparkles, Trash2, FileText } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
@@ -8,6 +8,7 @@ import { cabecalhoAuth } from "@/lib/sessao";
 import { normalizarEstrutura, type Estrutura } from "@/lib/estrutura";
 import { MODELO_EXEMPLO } from "@/lib/modelo-exemplo";
 import { mensagemErro } from "@/lib/erros";
+import { ConsoleLeitura } from "@/components/console-leitura";
 
 export const Route = createFileRoute("/_authenticated/modelos")({
   head: () => ({
@@ -41,6 +42,7 @@ function Modelos() {
   const [carregando, setCarregando] = useState(true);
   const [enviando, setEnviando] = useState(false);
   const [etapa, setEtapa] = useState("");
+  const [nomeArquivo, setNomeArquivo] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
 
   async function carregar() {
@@ -58,6 +60,7 @@ function Modelos() {
   }, []);
 
   async function enviarArquivo(file: File) {
+    setNomeArquivo(file.name);
     setEnviando(true);
     setEtapa("Lendo o documento…");
     try {
@@ -166,32 +169,41 @@ function Modelos() {
           falando.
         </p>
 
-        <div className="mt-5 rounded-2xl border border-dashed border-primary/40 bg-card p-6 text-center">
-          <input
-            ref={inputRef}
-            type="file"
-            className="hidden"
-            accept=".doc,.docx,.pdf,.txt,.md,image/*"
-            onChange={(e) => {
-              const f = e.target.files?.[0];
-              if (f) void enviarArquivo(f);
-            }}
-          />
-          <FileUp className="mx-auto size-7 text-primary" />
-          <p className="mt-3 text-sm font-medium text-foreground">
-            Enviar um documento com lacunas
-          </p>
-          <p className="mt-1 text-xs text-muted-foreground">Word, PDF, texto ou foto — até 15 MB</p>
-          <div className="mt-4 flex flex-wrap justify-center gap-2">
-            <Button disabled={enviando} onClick={() => inputRef.current?.click()} className="gap-2">
-              {enviando ? <Loader2 className="size-4 animate-spin" /> : <FileUp className="size-4" />}
-              {enviando ? etapa : "Escolher arquivo"}
-            </Button>
-            <Button variant="outline" disabled={enviando} onClick={criarExemplo} className="gap-2">
-              <Sparkles className="size-4" /> Usar modelo de exemplo
-            </Button>
+        <input
+          ref={inputRef}
+          type="file"
+          className="hidden"
+          accept=".doc,.docx,.pdf,.txt,.md,image/*"
+          onChange={(e) => {
+            const f = e.target.files?.[0];
+            if (f) void enviarArquivo(f);
+          }}
+        />
+
+        {enviando ? (
+          <div className="mt-5">
+            <ConsoleLeitura arquivo={nomeArquivo} etapa={etapa} />
           </div>
-        </div>
+        ) : (
+          <div className="mt-5 rounded-2xl border border-dashed border-primary/40 bg-card p-6 text-center">
+            <FileUp className="mx-auto size-7 text-primary" />
+            <p className="mt-3 text-sm font-medium text-foreground">
+              Enviar um documento com lacunas
+            </p>
+            <p className="mt-1 text-xs text-muted-foreground">
+              Word, PDF, texto ou foto — até 60 MB
+            </p>
+            <div className="mt-4 flex flex-wrap justify-center gap-2">
+              <Button onClick={() => inputRef.current?.click()} className="gap-2">
+                <FileUp className="size-4" /> Escolher arquivo
+              </Button>
+              <Button variant="outline" onClick={criarExemplo} className="gap-2">
+                <Sparkles className="size-4" /> Usar modelo de exemplo
+              </Button>
+            </div>
+          </div>
+        )}
+
 
         <div className="mt-7 space-y-3">
           {carregando ? (

@@ -143,3 +143,73 @@
     color: var(--color-foreground);
   }
 }
+
+/* --- Terminal de leitura de documentos --- */
+:root {
+  --terminal: oklch(0.19 0.03 175);
+  --terminal-foreground: oklch(0.94 0.02 165);
+  --terminal-muted: oklch(0.72 0.04 168);
+  --terminal-accent: oklch(0.8 0.17 165);
+  --terminal-warn: oklch(0.83 0.15 90);
+  --terminal-border: oklch(0.32 0.04 172);
+  --terminal-glow: oklch(0.62 0.14 168 / 45%);
+}
+
+.dark {
+  --terminal: oklch(0.16 0.03 175);
+  --terminal-foreground: oklch(0.95 0.02 165);
+  --terminal-muted: oklch(0.7 0.04 168);
+  --terminal-accent: oklch(0.82 0.17 165);
+  --terminal-warn: oklch(0.83 0.15 90);
+  --terminal-border: oklch(0.3 0.04 172);
+  --terminal-glow: oklch(0.62 0.14 168 / 35%);
+}
+
+@theme inline {
+  --color-terminal: var(--terminal);
+  --color-terminal-foreground: var(--terminal-foreground);
+  --color-terminal-muted: var(--terminal-muted);
+  --color-terminal-accent: var(--terminal-accent);
+  --color-terminal-warn: var(--terminal-warn);
+  --color-terminal-border: var(--terminal-border);
+}
+
+@keyframes terminal-cursor-blink {
+  0%, 45% { opacity: 1; }
+  50%, 100% { opacity: 0; }
+}
+
+.terminal-cursor {
+  animation: terminal-cursor-blink 1s steps(1) infinite;
+}
+
+@keyframes terminal-progress-slide {
+  0% { transform: translateX(-110%); }
+  100% { transform: translateX(320%); }
+}
+
+.terminal-progress {
+  animation: terminal-progress-slide 1.6s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+@keyframes terminal-scan-move {
+  0% { background-position: 0 -100%; }
+  100% { background-position: 0 100%; }
+}
+
+.terminal-scan {
+  background-image:
+    repeating-linear-gradient(
+      to bottom,
+      color-mix(in oklab, var(--terminal-accent) 7%, transparent) 0 1px,
+      transparent 1px 4px
+    );
+  animation: terminal-scan-move 6s linear infinite;
+  opacity: 0.5;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .terminal-cursor,
+  .terminal-progress,
+  .terminal-scan { animation: none; }
+}
