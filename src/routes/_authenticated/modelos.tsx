@@ -166,6 +166,17 @@ function Modelos() {
           falando.
         </p>
 
+        <input
+          ref={inputRef}
+          type="file"
+          className="hidden"
+          accept=".doc,.docx,.pdf,.txt,.md,image/*"
+          onChange={(e) => {
+            const f = e.target.files?.[0];
+            if (f) void enviarArquivo(f);
+          }}
+        />
+
         {enviando ? (
           <div className="mt-5">
             <ConsoleLeitura arquivo={nomeArquivo} etapa={etapa} />
