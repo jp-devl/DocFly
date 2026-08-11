@@ -60,6 +60,7 @@ function Modelos() {
   }, []);
 
   async function enviarArquivo(file: File) {
+    setNomeArquivo(file.name);
     setEnviando(true);
     setEtapa("Lendo o documento…");
     try {
