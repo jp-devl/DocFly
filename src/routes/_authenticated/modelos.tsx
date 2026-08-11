@@ -8,6 +8,7 @@ import { cabecalhoAuth } from "@/lib/sessao";
 import { normalizarEstrutura, type Estrutura } from "@/lib/estrutura";
 import { MODELO_EXEMPLO } from "@/lib/modelo-exemplo";
 import { mensagemErro } from "@/lib/erros";
+import { ConsoleLeitura } from "@/components/console-leitura";
 
 export const Route = createFileRoute("/_authenticated/modelos")({
   head: () => ({
