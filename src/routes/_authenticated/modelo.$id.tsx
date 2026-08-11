@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { cabecalhoAuth } from "@/lib/sessao";
 import { startRecording } from "@/lib/recorder";
+import { mensagemErro } from "@/lib/erros";
 import {
   fichaEmTexto,
   normalizarEstrutura,
@@ -113,7 +114,7 @@ function Preencher() {
         setPreenchidos(chaves);
         toast.success(`${chaves.length} campo(s) preenchido(s)`);
       } catch (err) {
-        toast.error(err instanceof Error ? err.message : "Erro ao gravar.");
+        toast.error(mensagemErro(err, "Não consegui gravar o áudio. Tente de novo."));
       } finally {
         setProcessando(null);
       }

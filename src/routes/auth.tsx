@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
+import { mensagemErro } from "@/lib/erros";
 
 export const Route = createFileRoute("/auth")({
   head: () => ({
@@ -54,7 +55,9 @@ function AuthPage() {
           options: { emailRedirectTo: window.location.origin },
         });
         if (error) throw error;
-        if (!data.session) {
+        if (data.session) {
+          toast.success("Conta criada! Bem-vindo ao Vozforma.");
+        } else {
           setAguardandoEmail(true);
           toast.success("Confirme seu e-mail para ativar a conta.");
         }
@@ -63,11 +66,7 @@ function AuthPage() {
         if (error) throw error;
       }
     } catch (err) {
-      const msg = err instanceof Error ? err.message : "Não foi possível continuar.";
-      toast.error(
-        msg.includes("Invalid login") ? "E-mail ou senha incorretos." :
-        msg.includes("already registered") ? "Esse e-mail já tem conta. Faça login." : msg,
-      );
+      toast.error(mensagemErro(err, "Não foi possível continuar. Tente novamente."));
     } finally {
       setCarregando(false);
     }
@@ -80,7 +79,7 @@ function AuthPage() {
     });
     if (result.error) {
       setCarregando(false);
-      toast.error("Não foi possível entrar com o Google.");
+      toast.error(mensagemErro(result.error, "Não foi possível entrar com o Google."));
       return;
     }
     if (result.redirected) return;
