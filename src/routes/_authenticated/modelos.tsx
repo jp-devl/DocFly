@@ -42,6 +42,7 @@ function Modelos() {
   const [carregando, setCarregando] = useState(true);
   const [enviando, setEnviando] = useState(false);
   const [etapa, setEtapa] = useState("");
+  const [nomeArquivo, setNomeArquivo] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
 
   async function carregar() {
