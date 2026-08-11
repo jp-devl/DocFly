@@ -25,8 +25,8 @@ export const Route = createFileRoute("/api/parse-document")({
         if (!(file instanceof File) || file.size === 0) {
           return json({ error: "Envie um arquivo válido." }, 400);
         }
-        if (file.size > 15 * 1024 * 1024) {
-          return json({ error: "O arquivo é maior que 15 MB." }, 400);
+        if (file.size > 60 * 1024 * 1024) {
+          return json({ error: "O arquivo é maior que 60 MB." }, 400);
         }
 
         try {
