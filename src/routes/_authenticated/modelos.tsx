@@ -319,9 +319,10 @@ function Modelos() {
                     variant="ghost"
                     size="icon"
                     aria-label={`Excluir ${m.nome}`}
+                    className="min-h-11 min-w-11 shrink-0 rounded-xl text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive"
                     onClick={() => excluir(m.id)}
                   >
-                    <Trash2 className="size-4 text-muted-foreground" />
+                    <Trash2 className="size-4" />
                   </Button>
                 </div>
               );
