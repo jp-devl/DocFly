@@ -104,6 +104,14 @@ function Modelos() {
 
   async function enviarArquivo(file: File) {
     setNomeArquivo(file.name);
+    setErro(null);
+    const invalido = validarArquivo(file);
+    if (invalido) {
+      setEnviando(true);
+      setErro(invalido);
+      if (inputRef.current) inputRef.current.value = "";
+      return;
+    }
     setEnviando(true);
     setEtapa("Lendo o documento…");
     try {
