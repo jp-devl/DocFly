@@ -156,12 +156,16 @@ function Modelos() {
       toast.success("Formulário criado! Agora é só falar.");
       void navigate({ to: "/modelo/$id", params: { id: novo.id } });
     } catch (err) {
-      toast.error(mensagemErro(err, "Não consegui processar esse documento."));
-    } finally {
-      setEnviando(false);
+      const msg = mensagemErro(err, "Não consegui processar esse documento.");
+      setErro({ erro: msg, motivo: "a leitura do documento não foi concluída" });
       setEtapa("");
       if (inputRef.current) inputRef.current.value = "";
+      return;
+    } finally {
+      if (inputRef.current) inputRef.current.value = "";
     }
+    setEnviando(false);
+    setEtapa("");
   }
 
   async function criarExemplo() {
