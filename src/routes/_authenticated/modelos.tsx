@@ -242,7 +242,21 @@ function Modelos() {
 
         {enviando ? (
           <div className="mt-5">
-            <ConsoleLeitura arquivo={nomeArquivo} etapa={etapa} />
+            <ConsoleLeitura
+              arquivo={nomeArquivo}
+              etapa={etapa}
+              erro={erro?.erro ?? null}
+              motivo={erro?.motivo ?? null}
+              onVoltar={() => {
+                setErro(null);
+                setEnviando(false);
+              }}
+              onTentarNovamente={() => {
+                setErro(null);
+                setEnviando(false);
+                window.setTimeout(() => inputRef.current?.click(), 60);
+              }}
+            />
           </div>
         ) : (
           <div className="mt-5 rounded-2xl border border-dashed border-primary/40 bg-card p-6 text-center">
@@ -254,10 +268,17 @@ function Modelos() {
               Word, PDF, texto ou foto — até 60 MB
             </p>
             <div className="mt-4 flex flex-wrap justify-center gap-2">
-              <Button onClick={() => inputRef.current?.click()} className="gap-2">
+              <Button
+                onClick={() => inputRef.current?.click()}
+                className="gap-2 rounded-xl px-5 shadow-md transition-all hover:-translate-y-0.5 hover:shadow-lg active:translate-y-0"
+              >
                 <FileUp className="size-4" /> Escolher arquivo
               </Button>
-              <Button variant="outline" onClick={criarExemplo} className="gap-2">
+              <Button
+                variant="outline"
+                onClick={criarExemplo}
+                className="gap-2 rounded-xl px-5 border-primary/40 text-primary shadow-sm transition-all hover:-translate-y-0.5 hover:bg-primary/5 hover:shadow-md active:translate-y-0"
+              >
                 <Sparkles className="size-4" /> Usar modelo de exemplo
               </Button>
             </div>
