@@ -1,17 +1,18 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
-import { ArrowLeft, FileDown, Loader2, Mic, RotateCcw, Save, Square } from "lucide-react";
+import { ArrowLeft, FileText, FileType2, Loader2, Mic, RotateCcw, Save, Square } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { cabecalhoAuth } from "@/lib/sessao";
 import { startRecording } from "@/lib/recorder";
 import { mensagemErro } from "@/lib/erros";
+import { baixarPdf, baixarWord } from "@/lib/exportar";
 import {
-  fichaEmTexto,
   normalizarEstrutura,
+  todosOsCampos,
+  type Campo,
   type Estrutura,
   type Valores,
 } from "@/lib/estrutura";
@@ -22,10 +23,10 @@ export const Route = createFileRoute("/_authenticated/modelo/$id")({
       { title: "Preencher por voz | Vozforma" },
       {
         name: "description",
-        content: "Fale os dados e veja os campos do seu formulário sendo preenchidos sozinhos.",
+        content: "Fale os dados e veja o documento completo sendo preenchido sozinho.",
       },
       { property: "og:title", content: "Preencher por voz | Vozforma" },
-      { property: "og:description", content: "Preenchimento de formulários por voz no Vozforma." },
+      { property: "og:description", content: "Preenchimento de documentos por voz no Vozforma." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],
@@ -34,6 +35,7 @@ export const Route = createFileRoute("/_authenticated/modelo/$id")({
 });
 
 type Stop = { stop: () => Promise<Blob> };
+const TUDO = "__tudo__";
 
 function Preencher() {
   const { id } = Route.useParams();
@@ -47,6 +49,7 @@ function Preencher() {
   const [transcricao, setTranscricao] = useState("");
   const [preenchidos, setPreenchidos] = useState<string[]>([]);
   const [salvando, setSalvando] = useState(false);
+  const [baixando, setBaixando] = useState(false);
   const recorderRef = useRef<Stop | null>(null);
 
   useEffect(() => {
@@ -70,16 +73,22 @@ function Preencher() {
   const setValor = (chave: string, valor: string) =>
     setValores((v) => ({ ...v, [chave]: valor }));
 
-  async function microfone(secaoId: string) {
-    const secao = estrutura.find((s) => s.id === secaoId);
-    if (!secao) return;
+  const total = todosOsCampos(estrutura).length;
+  const feitos = todosOsCampos(estrutura).filter((c) => (valores[c.chave] ?? "").trim()).length;
 
-    if (gravando === secaoId) {
+  async function microfone(alvo: string) {
+    const campos: Campo[] =
+      alvo === TUDO
+        ? todosOsCampos(estrutura)
+        : (estrutura.find((s) => s.id === alvo)?.campos ?? []);
+    if (campos.length === 0) return;
+
+    if (gravando === alvo) {
       const rec = recorderRef.current;
       recorderRef.current = null;
       setGravando(null);
       if (!rec) return;
-      setProcessando(secaoId);
+      setProcessando(alvo);
       try {
         const blob = await rec.stop();
         if (blob.size < 2048) {
@@ -88,7 +97,7 @@ function Preencher() {
         }
         const fd = new FormData();
         fd.append("audio", blob, "recording.wav");
-        fd.append("campos", JSON.stringify(secao.campos));
+        fd.append("campos", JSON.stringify(campos));
         const res = await fetch("/api/voice-fill", {
           method: "POST",
           headers: await cabecalhoAuth(),
@@ -104,13 +113,13 @@ function Preencher() {
           return;
         }
         setTranscricao(data.transcript ?? "");
-        const campos = data.fields ?? {};
-        const chaves = Object.keys(campos);
+        const novos = data.fields ?? {};
+        const chaves = Object.keys(novos);
         if (chaves.length === 0) {
           toast("Nada reconhecido nessa fala.", { description: data.transcript });
           return;
         }
-        setValores((v) => ({ ...v, ...campos }));
+        setValores((v) => ({ ...v, ...novos }));
         setPreenchidos(chaves);
         toast.success(`${chaves.length} campo(s) preenchido(s)`);
       } catch (err) {
@@ -123,7 +132,7 @@ function Preencher() {
 
     try {
       recorderRef.current = await startRecording();
-      setGravando(secaoId);
+      setGravando(alvo);
     } catch {
       toast.error("Preciso de acesso ao microfone para ouvir você.");
     }
@@ -153,14 +162,25 @@ function Preencher() {
     toast.success("Ficha salva na sua conta.");
   }
 
-  function exportar() {
-    const texto = fichaEmTexto(nome, estrutura, valores);
-    const url = URL.createObjectURL(new Blob([texto], { type: "text/plain;charset=utf-8" }));
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `${nome.replace(/[^\w\-]+/g, "-").toLowerCase()}.txt`;
-    a.click();
-    URL.revokeObjectURL(url);
+  async function exportarWord() {
+    setBaixando(true);
+    try {
+      await baixarWord(nome, estrutura, valores);
+      toast.success("Documento Word baixado.");
+    } catch (err) {
+      toast.error(mensagemErro(err, "Não consegui gerar o Word."));
+    } finally {
+      setBaixando(false);
+    }
+  }
+
+  function exportarPdf() {
+    try {
+      baixarPdf(nome, estrutura, valores);
+      toast.success("PDF baixado.");
+    } catch (err) {
+      toast.error(mensagemErro(err, "Não consegui gerar o PDF."));
+    }
   }
 
   if (carregando) {
@@ -171,26 +191,37 @@ function Preencher() {
     );
   }
 
+  const gravandoTudo = gravando === TUDO;
+  const processandoTudo = processando === TUDO;
+
   return (
-    <main className="min-h-screen bg-muted/30 pb-24">
-      <header className="border-b border-border bg-card">
-        <div className="mx-auto max-w-3xl px-5 py-4">
-          <Link
-            to="/modelos"
-            className="inline-flex items-center gap-1 text-xs font-medium text-muted-foreground hover:text-foreground"
-          >
-            <ArrowLeft className="size-3.5" /> Meus modelos
-          </Link>
-          <h1 className="mt-2 text-xl font-bold leading-tight text-foreground">{nome}</h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Toque no microfone de cada bloco e fale naturalmente. Você só confere no final.
-          </p>
+    <main className="min-h-screen bg-muted/40 pb-36">
+      <header className="sticky top-0 z-20 border-b border-border bg-card/95 backdrop-blur">
+        <div className="mx-auto flex max-w-4xl items-center justify-between gap-4 px-5 py-3">
+          <div className="min-w-0">
+            <Link
+              to="/modelos"
+              className="inline-flex items-center gap-1 text-xs font-medium text-muted-foreground hover:text-foreground"
+            >
+              <ArrowLeft className="size-3.5" /> Meus modelos
+            </Link>
+            <h1 className="truncate text-base font-bold text-foreground">{nome}</h1>
+          </div>
+          <div className="text-right text-xs text-muted-foreground">
+            <span className="font-semibold text-foreground">{feitos}</span>/{total} campos
+          </div>
+        </div>
+        <div className="h-1 w-full bg-muted">
+          <div
+            className="h-full rounded-r-full bg-primary transition-all duration-500"
+            style={{ width: total ? `${(feitos / total) * 100}%` : "0%" }}
+          />
         </div>
       </header>
 
-      <div className="mx-auto max-w-3xl space-y-5 px-5 py-6">
+      <div className="mx-auto max-w-4xl px-4 py-6">
         {transcricao && (
-          <div className="rounded-xl border border-border bg-card p-4">
+          <div className="mb-4 rounded-xl border border-border bg-card p-4">
             <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
               Você disse
             </p>
@@ -198,98 +229,108 @@ function Preencher() {
           </div>
         )}
 
-        {estrutura.map((secao) => {
-          const gravandoEssa = gravando === secao.id;
-          const ocupada = processando === secao.id;
-          return (
-            <section
-              key={secao.id}
-              className="rounded-2xl border border-border bg-card p-5 shadow-sm"
-            >
-              <div className="flex items-start justify-between gap-4">
-                <div>
-                  <h2 className="text-lg font-semibold text-foreground">{secao.titulo}</h2>
-                  <p className="mt-1 text-xs text-muted-foreground">{secao.dica}</p>
-                </div>
-                <Button
-                  type="button"
-                  size="icon"
-                  variant={gravandoEssa ? "destructive" : "default"}
-                  className="size-12 shrink-0 rounded-full"
-                  aria-label={gravandoEssa ? "Parar gravação" : `Falar dados de ${secao.titulo}`}
-                  disabled={ocupada || (gravando !== null && !gravandoEssa)}
-                  onClick={() => microfone(secao.id)}
-                >
-                  {ocupada ? (
-                    <Loader2 className="size-5 animate-spin" />
-                  ) : gravandoEssa ? (
-                    <Square className="size-5" />
-                  ) : (
-                    <Mic className="size-5" />
-                  )}
-                </Button>
-              </div>
+        {/* Folha do documento */}
+        <article className="rounded-2xl border border-border bg-card px-6 py-8 shadow-lg sm:px-12 sm:py-12">
+          <h2 className="text-center text-xl font-bold uppercase tracking-wide text-foreground">
+            {nome}
+          </h2>
+          <div className="mx-auto mt-3 h-px w-24 bg-border" />
 
-              {gravandoEssa && (
-                <p className="mt-3 flex items-center gap-2 text-sm font-medium text-destructive">
-                  <span className="inline-block size-2 animate-pulse rounded-full bg-destructive" />
-                  Ouvindo… toque no quadrado para parar.
-                </p>
-              )}
-
-              <div className="mt-4 grid gap-4 sm:grid-cols-2">
-                {secao.campos.map((campo) => {
-                  const opcoes =
-                    campo.tipo === "simnao" ? ["Sim", "Não"] : campo.opcoes ?? null;
-                  return (
-                    <div
-                      key={campo.chave}
-                      className={campo.longo || opcoes ? "sm:col-span-2" : ""}
+          <div className="mt-8 space-y-9">
+            {estrutura.map((secao) => {
+              const gravandoEssa = gravando === secao.id;
+              const ocupada = processando === secao.id;
+              return (
+                <section key={secao.id}>
+                  <div className="flex items-center justify-between gap-3 border-b border-border pb-2">
+                    <h3 className="text-sm font-bold uppercase tracking-wider text-foreground">
+                      {secao.titulo}
+                    </h3>
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant={gravandoEssa ? "destructive" : "outline"}
+                      className="h-8 shrink-0 gap-1.5 rounded-full px-3 text-xs"
+                      aria-label={gravandoEssa ? "Parar gravação" : `Falar dados de ${secao.titulo}`}
+                      disabled={ocupada || (gravando !== null && !gravandoEssa)}
+                      onClick={() => microfone(secao.id)}
                     >
-                      <Label htmlFor={campo.chave} className="text-xs text-muted-foreground">
-                        {campo.rotulo}
-                      </Label>
-                      {opcoes ? (
-                        <div className="mt-2 flex flex-wrap gap-2">
-                          {opcoes.map((opt) => (
-                            <Button
-                              key={opt}
-                              type="button"
-                              size="sm"
-                              variant={valores[campo.chave] === opt ? "default" : "outline"}
-                              onClick={() => setValor(campo.chave, opt)}
-                            >
-                              {opt}
-                            </Button>
-                          ))}
-                        </div>
+                      {ocupada ? (
+                        <Loader2 className="size-3.5 animate-spin" />
+                      ) : gravandoEssa ? (
+                        <Square className="size-3.5" />
                       ) : (
-                        <Input
-                          id={campo.chave}
-                          type={campo.tipo === "data" ? "date" : "text"}
-                          inputMode={campo.tipo === "numero" ? "decimal" : undefined}
-                          value={valores[campo.chave] ?? ""}
-                          onChange={(e) => setValor(campo.chave, e.target.value)}
-                          className={
-                            preenchidos.includes(campo.chave) ? "mt-1 ring-2 ring-primary/40" : "mt-1"
-                          }
-                        />
+                        <Mic className="size-3.5" />
                       )}
-                    </div>
-                  );
-                })}
-              </div>
-            </section>
-          );
-        })}
+                      {gravandoEssa ? "Parar" : "Falar"}
+                    </Button>
+                  </div>
+                  <p className="mt-2 text-xs text-muted-foreground">{secao.dica}</p>
 
-        <div className="flex flex-wrap gap-3">
-          <Button onClick={salvar} disabled={salvando} className="gap-2">
+                  <div className="mt-4 space-y-3">
+                    {secao.campos.map((campo) => {
+                      const opcoes =
+                        campo.tipo === "simnao" ? ["Sim", "Não"] : campo.opcoes ?? null;
+                      const destacado = preenchidos.includes(campo.chave);
+                      return (
+                        <div
+                          key={campo.chave}
+                          className="flex flex-col gap-1 sm:flex-row sm:items-baseline sm:gap-3"
+                        >
+                          <span className="shrink-0 text-sm font-semibold text-foreground sm:w-56">
+                            {campo.rotulo}:
+                          </span>
+                          {opcoes ? (
+                            <div className="flex flex-wrap gap-2">
+                              {opcoes.map((opt) => (
+                                <Button
+                                  key={opt}
+                                  type="button"
+                                  size="sm"
+                                  className="h-7 rounded-full px-3 text-xs"
+                                  variant={valores[campo.chave] === opt ? "default" : "outline"}
+                                  onClick={() => setValor(campo.chave, opt)}
+                                >
+                                  {opt}
+                                </Button>
+                              ))}
+                            </div>
+                          ) : (
+                            <Input
+                              id={campo.chave}
+                              type={campo.tipo === "data" ? "date" : "text"}
+                              inputMode={campo.tipo === "numero" ? "decimal" : undefined}
+                              value={valores[campo.chave] ?? ""}
+                              placeholder="_______________"
+                              onChange={(e) => setValor(campo.chave, e.target.value)}
+                              className={`h-8 flex-1 rounded-none border-0 border-b bg-transparent px-1 shadow-none focus-visible:ring-0 ${
+                                destacado
+                                  ? "border-b-primary bg-primary/5 font-medium text-foreground"
+                                  : "border-b-border"
+                              }`}
+                            />
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </section>
+              );
+            })}
+          </div>
+        </article>
+
+        <div className="mt-6 flex flex-wrap gap-3">
+          <Button onClick={salvar} disabled={salvando} variant="secondary" className="gap-2">
             {salvando ? <Loader2 className="size-4 animate-spin" /> : <Save className="size-4" />}
             Salvar ficha
           </Button>
-          <Button variant="outline" onClick={exportar} className="gap-2">
-            <FileDown className="size-4" /> Exportar
+          <Button onClick={exportarWord} disabled={baixando} className="gap-2">
+            {baixando ? <Loader2 className="size-4 animate-spin" /> : <FileType2 className="size-4" />}
+            Baixar Word
+          </Button>
+          <Button onClick={exportarPdf} variant="outline" className="gap-2">
+            <FileText className="size-4" /> Baixar PDF
           </Button>
           <Button
             variant="ghost"
@@ -301,6 +342,34 @@ function Preencher() {
             }}
           >
             <RotateCcw className="size-4" /> Limpar
+          </Button>
+        </div>
+      </div>
+
+      {/* Microfone geral */}
+      <div className="fixed inset-x-0 bottom-0 z-30 border-t border-border bg-card/95 px-5 py-3 backdrop-blur">
+        <div className="mx-auto flex max-w-4xl items-center justify-between gap-4">
+          <p className="text-xs text-muted-foreground">
+            {gravandoTudo
+              ? "Ouvindo… fale os dados e toque para parar."
+              : "Fale de uma vez só: eu distribuo cada dado no campo certo."}
+          </p>
+          <Button
+            type="button"
+            size="lg"
+            variant={gravandoTudo ? "destructive" : "default"}
+            className="shrink-0 gap-2 rounded-full px-6"
+            disabled={processandoTudo || (gravando !== null && !gravandoTudo)}
+            onClick={() => microfone(TUDO)}
+          >
+            {processandoTudo ? (
+              <Loader2 className="size-5 animate-spin" />
+            ) : gravandoTudo ? (
+              <Square className="size-5" />
+            ) : (
+              <Mic className="size-5" />
+            )}
+            {gravandoTudo ? "Parar" : "Falar tudo"}
           </Button>
         </div>
       </div>
