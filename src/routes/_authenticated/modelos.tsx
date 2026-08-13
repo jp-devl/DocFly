@@ -36,6 +36,48 @@ type Modelo = {
   created_at: string;
 };
 
+const ACEITOS = [".doc", ".docx", ".pdf", ".txt", ".md"];
+
+const FAMILIAS: Array<[RegExp, string]> = [
+  [/\.(mov|mp4|avi|mkv|webm|wmv|m4v|3gp)$/i, "é um vídeo, e vídeos não têm texto para ler"],
+  [/\.(mp3|wav|m4a|ogg|aac|flac)$/i, "é um áudio, e áudios não têm texto para ler"],
+  [/\.(zip|rar|7z|tar|gz)$/i, "é um arquivo compactado; extraia e envie o documento de dentro"],
+  [/\.(xls|xlsx|csv)$/i, "é uma planilha; salve como PDF antes de enviar"],
+  [/\.(ppt|pptx)$/i, "é uma apresentação; salve como PDF antes de enviar"],
+  [/\.(exe|dmg|apk|app)$/i, "é um programa, não um documento"],
+];
+
+/** Valida o arquivo antes de enviar e devolve a mensagem de erro em português. */
+function validarArquivo(file: File): { erro: string; motivo: string } | null {
+  const nome = file.name.toLowerCase();
+  const ext = nome.slice(nome.lastIndexOf(".")) || "sem extensão";
+  const imagem = file.type.startsWith("image/") || /\.(jpe?g|png|webp|heic|heif|gif|bmp)$/i.test(nome);
+
+  if (file.size > 60 * 1024 * 1024) {
+    return {
+      erro: `O arquivo "${file.name}" tem ${(file.size / 1048576).toFixed(1)} MB e o limite é 60 MB.`,
+      motivo: "arquivo grande demais para leitura",
+    };
+  }
+
+  for (const [regex, motivo] of FAMILIAS) {
+    if (regex.test(nome)) {
+      return {
+        erro: `O arquivo "${file.name}" não atende aos requisitos porque é ${ext}.`,
+        motivo,
+      };
+    }
+  }
+
+  if (!imagem && !ACEITOS.some((a) => nome.endsWith(a))) {
+    return {
+      erro: `O arquivo "${file.name}" não atende aos requisitos porque é ${ext}.`,
+      motivo: "esse formato não é aceito pelo leitor",
+    };
+  }
+  return null;
+}
+
 function Modelos() {
   const navigate = useNavigate();
   const [modelos, setModelos] = useState<Modelo[]>([]);
@@ -43,6 +85,7 @@ function Modelos() {
   const [enviando, setEnviando] = useState(false);
   const [etapa, setEtapa] = useState("");
   const [nomeArquivo, setNomeArquivo] = useState("");
+  const [erro, setErro] = useState<{ erro: string; motivo: string } | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
   async function carregar() {
@@ -61,6 +104,14 @@ function Modelos() {
 
   async function enviarArquivo(file: File) {
     setNomeArquivo(file.name);
+    setErro(null);
+    const invalido = validarArquivo(file);
+    if (invalido) {
+      setEnviando(true);
+      setErro(invalido);
+      if (inputRef.current) inputRef.current.value = "";
+      return;
+    }
     setEnviando(true);
     setEtapa("Lendo o documento…");
     try {
@@ -105,12 +156,16 @@ function Modelos() {
       toast.success("Formulário criado! Agora é só falar.");
       void navigate({ to: "/modelo/$id", params: { id: novo.id } });
     } catch (err) {
-      toast.error(mensagemErro(err, "Não consegui processar esse documento."));
-    } finally {
-      setEnviando(false);
+      const msg = mensagemErro(err, "Não consegui processar esse documento.");
+      setErro({ erro: msg, motivo: "a leitura do documento não foi concluída" });
       setEtapa("");
       if (inputRef.current) inputRef.current.value = "";
+      return;
+    } finally {
+      if (inputRef.current) inputRef.current.value = "";
     }
+    setEnviando(false);
+    setEtapa("");
   }
 
   async function criarExemplo() {
@@ -156,7 +211,12 @@ function Modelos() {
           <Link to="/" className="text-lg font-bold tracking-tight text-foreground">
             Voz<span className="text-primary">forma</span>
           </Link>
-          <Button variant="ghost" size="sm" className="gap-2" onClick={sair}>
+          <Button
+            variant="outline"
+            size="sm"
+            className="gap-2 rounded-xl border-border/80 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md active:translate-y-0"
+            onClick={sair}
+          >
             <LogOut className="size-4" /> Sair
           </Button>
         </div>
@@ -182,7 +242,21 @@ function Modelos() {
 
         {enviando ? (
           <div className="mt-5">
-            <ConsoleLeitura arquivo={nomeArquivo} etapa={etapa} />
+            <ConsoleLeitura
+              arquivo={nomeArquivo}
+              etapa={etapa}
+              erro={erro?.erro ?? null}
+              motivo={erro?.motivo ?? null}
+              onVoltar={() => {
+                setErro(null);
+                setEnviando(false);
+              }}
+              onTentarNovamente={() => {
+                setErro(null);
+                setEnviando(false);
+                window.setTimeout(() => inputRef.current?.click(), 60);
+              }}
+            />
           </div>
         ) : (
           <div className="mt-5 rounded-2xl border border-dashed border-primary/40 bg-card p-6 text-center">
@@ -194,10 +268,17 @@ function Modelos() {
               Word, PDF, texto ou foto — até 60 MB
             </p>
             <div className="mt-4 flex flex-wrap justify-center gap-2">
-              <Button onClick={() => inputRef.current?.click()} className="gap-2">
+              <Button
+                onClick={() => inputRef.current?.click()}
+                className="gap-2 rounded-xl px-5 shadow-md transition-all hover:-translate-y-0.5 hover:shadow-lg active:translate-y-0"
+              >
                 <FileUp className="size-4" /> Escolher arquivo
               </Button>
-              <Button variant="outline" onClick={criarExemplo} className="gap-2">
+              <Button
+                variant="outline"
+                onClick={criarExemplo}
+                className="gap-2 rounded-xl px-5 border-primary/40 text-primary shadow-sm transition-all hover:-translate-y-0.5 hover:bg-primary/5 hover:shadow-md active:translate-y-0"
+              >
                 <Sparkles className="size-4" /> Usar modelo de exemplo
               </Button>
             </div>
@@ -238,9 +319,10 @@ function Modelos() {
                     variant="ghost"
                     size="icon"
                     aria-label={`Excluir ${m.nome}`}
+                    className="min-h-11 min-w-11 shrink-0 rounded-xl text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive"
                     onClick={() => excluir(m.id)}
                   >
-                    <Trash2 className="size-4 text-muted-foreground" />
+                    <Trash2 className="size-4" />
                   </Button>
                 </div>
               );
