@@ -1,10 +1,20 @@
 import { useEffect, useRef, useState } from "react";
+import { ArrowLeft, RotateCcw } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 type Props = {
   /** Nome do arquivo sendo lido. */
   arquivo: string;
   /** Etapa atual vinda do fluxo de upload. */
   etapa: string;
+  /** Mensagem de erro em português, quando a leitura falha. */
+  erro?: string | null;
+  /** Explicação curta do motivo (ex.: extensão não aceita). */
+  motivo?: string | null;
+  /** Volta para a tela de envio. */
+  onVoltar?: () => void;
+  /** Tenta escolher outro arquivo. */
+  onTentarNovamente?: () => void;
 };
 
 const LINHAS_BASE = [
@@ -20,13 +30,21 @@ const LINHAS_BASE = [
   "✓ pronto para falar",
 ];
 
-export function ConsoleLeitura({ arquivo, etapa }: Props) {
+export function ConsoleLeitura({
+  arquivo,
+  etapa,
+  erro,
+  motivo,
+  onVoltar,
+  onTentarNovamente,
+}: Props) {
   const [linhas, setLinhas] = useState<string[]>([]);
   const [parcial, setParcial] = useState("");
   const [segundos, setSegundos] = useState(0);
   const fim = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    if (erro) return;
     let indice = 0;
     let letra = 0;
     let ativo = true;
@@ -54,14 +72,18 @@ export function ConsoleLeitura({ arquivo, etapa }: Props) {
       window.clearTimeout(inicio);
       window.clearInterval(relogio);
     };
-  }, [arquivo]);
+  }, [arquivo, erro]);
 
   useEffect(() => {
     fim.current?.scrollIntoView({ block: "end" });
-  }, [linhas, parcial]);
+  }, [linhas, parcial, erro]);
 
   return (
-    <div className="animate-fade-in overflow-hidden rounded-2xl border border-terminal-border bg-terminal shadow-[0_20px_60px_-25px_var(--terminal-glow)]">
+    <div
+      className={`animate-fade-in overflow-hidden rounded-2xl border bg-terminal shadow-[0_20px_60px_-25px_var(--terminal-glow)] ${
+        erro ? "border-destructive/50" : "border-terminal-border"
+      }`}
+    >
       <div className="flex items-center gap-2 border-b border-terminal-border px-4 py-2.5">
         <span className="size-2.5 rounded-full bg-destructive/70" />
         <span className="size-2.5 rounded-full bg-terminal-warn/70" />
@@ -77,7 +99,7 @@ export function ConsoleLeitura({ arquivo, etapa }: Props) {
 
       <div className="relative">
         <div className="terminal-scan pointer-events-none absolute inset-0" />
-        <div className="h-56 space-y-1 overflow-hidden px-4 py-4 font-mono text-[12px] leading-relaxed">
+        <div className="h-56 space-y-1 overflow-y-auto px-4 py-4 font-mono text-[12px] leading-relaxed">
           {linhas.map((l, i) => (
             <p
               key={`${l}-${i}`}
@@ -92,24 +114,62 @@ export function ConsoleLeitura({ arquivo, etapa }: Props) {
               {l}
             </p>
           ))}
-          {parcial && (
+          {!erro && parcial && (
             <p className="text-terminal-foreground">
               {parcial}
               <span className="terminal-cursor ml-0.5 inline-block h-3.5 w-1.5 translate-y-0.5 bg-terminal-accent" />
             </p>
+          )}
+
+          {erro && (
+            <div className="mt-2 space-y-1">
+              <p className="text-destructive">✗ erro identificado</p>
+              <p className="text-destructive">
+                {"» "}
+                {erro}
+              </p>
+              {motivo && (
+                <p className="text-terminal-warn">
+                  {"» motivo: "}
+                  {motivo}
+                </p>
+              )}
+              <p className="text-terminal-muted">
+                {"» aceitos: .doc · .docx · .pdf · .txt · .md · fotos (jpg, png, heic)"}
+              </p>
+              <p className="text-terminal-muted">{"» leitura interrompida — nada foi salvo"}</p>
+            </div>
           )}
           <div ref={fim} />
         </div>
       </div>
 
       <div className="border-t border-terminal-border px-4 py-3">
-        <div className="flex items-center justify-between font-mono text-[11px] text-terminal-muted">
-          <span className="text-terminal-accent">{etapa || "processando…"}</span>
-          <span>não feche esta página</span>
-        </div>
-        <div className="mt-2 h-1 overflow-hidden rounded-full bg-terminal-border">
-          <div className="terminal-progress h-full w-1/3 rounded-full bg-terminal-accent" />
-        </div>
+        {erro ? (
+          <div className="flex flex-wrap gap-2">
+            <Button
+              variant="secondary"
+              size="sm"
+              className="gap-2 rounded-xl"
+              onClick={onVoltar}
+            >
+              <ArrowLeft className="size-4" /> Voltar
+            </Button>
+            <Button size="sm" className="gap-2 rounded-xl" onClick={onTentarNovamente}>
+              <RotateCcw className="size-4" /> Escolher outro arquivo
+            </Button>
+          </div>
+        ) : (
+          <>
+            <div className="flex items-center justify-between font-mono text-[11px] text-terminal-muted">
+              <span className="text-terminal-accent">{etapa || "processando…"}</span>
+              <span>não feche esta página</span>
+            </div>
+            <div className="mt-2 h-1 overflow-hidden rounded-full bg-terminal-border">
+              <div className="terminal-progress h-full w-1/3 rounded-full bg-terminal-accent" />
+            </div>
+          </>
+        )}
       </div>
     </div>
   );
