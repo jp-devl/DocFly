@@ -36,6 +36,48 @@ type Modelo = {
   created_at: string;
 };
 
+const ACEITOS = [".doc", ".docx", ".pdf", ".txt", ".md"];
+
+const FAMILIAS: Array<[RegExp, string]> = [
+  [/\.(mov|mp4|avi|mkv|webm|wmv|m4v|3gp)$/i, "é um vídeo, e vídeos não têm texto para ler"],
+  [/\.(mp3|wav|m4a|ogg|aac|flac)$/i, "é um áudio, e áudios não têm texto para ler"],
+  [/\.(zip|rar|7z|tar|gz)$/i, "é um arquivo compactado; extraia e envie o documento de dentro"],
+  [/\.(xls|xlsx|csv)$/i, "é uma planilha; salve como PDF antes de enviar"],
+  [/\.(ppt|pptx)$/i, "é uma apresentação; salve como PDF antes de enviar"],
+  [/\.(exe|dmg|apk|app)$/i, "é um programa, não um documento"],
+];
+
+/** Valida o arquivo antes de enviar e devolve a mensagem de erro em português. */
+function validarArquivo(file: File): { erro: string; motivo: string } | null {
+  const nome = file.name.toLowerCase();
+  const ext = nome.slice(nome.lastIndexOf(".")) || "sem extensão";
+  const imagem = file.type.startsWith("image/") || /\.(jpe?g|png|webp|heic|heif|gif|bmp)$/i.test(nome);
+
+  if (file.size > 60 * 1024 * 1024) {
+    return {
+      erro: `O arquivo "${file.name}" tem ${(file.size / 1048576).toFixed(1)} MB e o limite é 60 MB.`,
+      motivo: "arquivo grande demais para leitura",
+    };
+  }
+
+  for (const [regex, motivo] of FAMILIAS) {
+    if (regex.test(nome)) {
+      return {
+        erro: `O arquivo "${file.name}" não atende aos requisitos porque é ${ext}.`,
+        motivo,
+      };
+    }
+  }
+
+  if (!imagem && !ACEITOS.some((a) => nome.endsWith(a))) {
+    return {
+      erro: `O arquivo "${file.name}" não atende aos requisitos porque é ${ext}.`,
+      motivo: "esse formato não é aceito pelo leitor",
+    };
+  }
+  return null;
+}
+
 function Modelos() {
   const navigate = useNavigate();
   const [modelos, setModelos] = useState<Modelo[]>([]);
@@ -43,6 +85,7 @@ function Modelos() {
   const [enviando, setEnviando] = useState(false);
   const [etapa, setEtapa] = useState("");
   const [nomeArquivo, setNomeArquivo] = useState("");
+  const [erro, setErro] = useState<{ erro: string; motivo: string } | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
   async function carregar() {
