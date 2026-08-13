@@ -211,7 +211,12 @@ function Modelos() {
           <Link to="/" className="text-lg font-bold tracking-tight text-foreground">
             Voz<span className="text-primary">forma</span>
           </Link>
-          <Button variant="ghost" size="sm" className="gap-2" onClick={sair}>
+          <Button
+            variant="outline"
+            size="sm"
+            className="gap-2 rounded-xl border-border/80 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md active:translate-y-0"
+            onClick={sair}
+          >
             <LogOut className="size-4" /> Sair
           </Button>
         </div>
