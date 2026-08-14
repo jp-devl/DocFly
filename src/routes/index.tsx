@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Mic, FileText, ShieldCheck, Sparkles } from "lucide-react";
+import { Marca } from "@/components/marca";
 import { Button } from "@/components/ui/button";
 import { useSessao } from "@/lib/sessao";
 
@@ -32,9 +33,7 @@ function Landing() {
     <main className="min-h-screen bg-background">
       <header className="border-b border-border">
         <div className="mx-auto flex max-w-5xl items-center justify-between px-5 py-4">
-          <span className="text-lg font-bold tracking-tight text-foreground">
-            VOZA
-          </span>
+          <Marca tamanho="sm" />
           <Button asChild size="sm" variant={session ? "default" : "outline"}>
             <Link to={destino}>{session ? "Meus modelos" : "Entrar"}</Link>
           </Button>

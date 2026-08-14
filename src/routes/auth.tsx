@@ -2,6 +2,7 @@ import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import { Marca } from "@/components/marca";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -89,8 +90,8 @@ function AuthPage() {
   return (
     <main className="flex min-h-screen items-center justify-center bg-muted/40 px-5 py-12">
       <div className="w-full max-w-sm">
-        <Link to="/" className="block text-center text-lg font-bold tracking-tight text-foreground">
-          VOZA
+        <Link to="/" className="block text-center">
+          <Marca tamanho="md" />
         </Link>
 
         <div className="mt-6 rounded-2xl border border-border bg-card p-6 shadow-sm">
