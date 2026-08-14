@@ -174,14 +174,18 @@ function Preencher() {
     }
   }
 
-  function exportarPdf() {
+  async function exportarPdf() {
+    setBaixando(true);
     try {
-      baixarPdf(nome, estrutura, valores);
-      toast.success("PDF baixado.");
+      await baixarPdf(nome, estrutura, valores);
+      toast.success("PDF pronto. Escolha onde salvar no seu aparelho.");
     } catch (err) {
       toast.error(mensagemErro(err, "Não consegui gerar o PDF."));
+    } finally {
+      setBaixando(false);
     }
   }
+
 
   if (carregando) {
     return (
