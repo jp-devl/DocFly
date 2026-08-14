@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { ArrowLeft, FileText, FileType2, Loader2, Mic, RotateCcw, Save, Square } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import { TemaToggle } from "@/components/tema-toggle";
 import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
 import { cabecalhoAuth } from "@/lib/sessao";
@@ -166,7 +167,7 @@ function Preencher() {
     setBaixando(true);
     try {
       await baixarWord(nome, estrutura, valores);
-      toast.success("Documento Word baixado.");
+      toast.success("Word pronto. Escolha onde salvar no seu aparelho.");
     } catch (err) {
       toast.error(mensagemErro(err, "Não consegui gerar o Word."));
     } finally {
@@ -211,8 +212,14 @@ function Preencher() {
             </Link>
             <h1 className="truncate text-base font-bold text-foreground">{nome}</h1>
           </div>
-          <div className="text-right text-xs text-muted-foreground">
-            <span className="font-semibold text-foreground">{feitos}</span>/{total} campos
+          <div className="flex items-center gap-3">
+            <div className="text-right text-xs text-muted-foreground">
+              <span className="font-semibold text-foreground transition-all duration-300">
+                {feitos}
+              </span>
+              /{total} campos
+            </div>
+            <TemaToggle />
           </div>
         </div>
         <div className="h-1 w-full bg-muted">
@@ -225,7 +232,7 @@ function Preencher() {
 
       <div className="mx-auto max-w-4xl px-4 py-6">
         {transcricao && (
-          <div className="mb-4 rounded-xl border border-border bg-card p-4">
+          <div className="mb-4 animate-fade-in rounded-xl border border-border bg-card p-4 shadow-sm">
             <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
               Você disse
             </p>
@@ -234,7 +241,7 @@ function Preencher() {
         )}
 
         {/* Folha do documento */}
-        <article className="rounded-2xl border border-border bg-card px-6 py-8 shadow-lg sm:px-12 sm:py-12">
+        <article className="animate-fade-in rounded-2xl border border-border bg-card px-6 py-8 shadow-lg transition-shadow duration-300 hover:shadow-xl sm:px-12 sm:py-12">
           <h2 className="text-center text-xl font-bold uppercase tracking-wide text-foreground">
             {nome}
           </h2>
@@ -245,7 +252,7 @@ function Preencher() {
               const gravandoEssa = gravando === secao.id;
               const ocupada = processando === secao.id;
               return (
-                <section key={secao.id}>
+                <section key={secao.id} className="animate-fade-in">
                   <div className="flex items-center justify-between gap-3 border-b border-border pb-2">
                     <h3 className="text-sm font-bold uppercase tracking-wider text-foreground">
                       {secao.titulo}
@@ -254,7 +261,7 @@ function Preencher() {
                       type="button"
                       size="sm"
                       variant={gravandoEssa ? "destructive" : "outline"}
-                      className="h-8 shrink-0 gap-1.5 rounded-full px-3 text-xs"
+                      className={`h-8 shrink-0 gap-1.5 rounded-full px-3 text-xs shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md active:translate-y-0 active:scale-95 ${gravandoEssa ? "animate-pulse" : ""}`}
                       aria-label={gravandoEssa ? "Parar gravação" : `Falar dados de ${secao.titulo}`}
                       disabled={ocupada || (gravando !== null && !gravandoEssa)}
                       onClick={() => microfone(secao.id)}
@@ -297,7 +304,7 @@ function Preencher() {
                                   key={opt}
                                   type="button"
                                   size="sm"
-                                  className="h-7 rounded-full px-3 text-xs"
+                                  className="h-7 rounded-full px-3 text-xs transition-all duration-200 hover:-translate-y-0.5 active:scale-95"
                                   variant={valores[campo.chave] === opt ? "default" : "outline"}
                                   onClick={() => setValor(campo.chave, opt)}
                                 >
@@ -313,7 +320,7 @@ function Preencher() {
                               value={valores[campo.chave] ?? ""}
                               placeholder="_______________"
                               onChange={(e) => setValor(campo.chave, e.target.value)}
-                              className={`h-8 flex-1 rounded-none border-0 border-b bg-transparent px-1 shadow-none focus-visible:ring-0 ${
+                              className={`h-8 flex-1 rounded-none border-0 border-b bg-transparent px-1 shadow-none transition-all duration-300 focus-visible:ring-0 ${
                                 destacado
                                   ? "border-b-primary bg-primary/5 font-medium text-foreground"
                                   : "border-b-border"
@@ -330,7 +337,7 @@ function Preencher() {
           </div>
         </article>
 
-        <div className="mt-6 flex flex-wrap gap-3">
+        <div className="mt-6 flex flex-wrap gap-3 [&>button]:rounded-xl [&>button]:shadow-sm [&>button]:transition-all [&>button]:duration-300 hover:[&>button]:-translate-y-0.5 hover:[&>button]:shadow-md active:[&>button]:translate-y-0 active:[&>button]:scale-95">
           <Button onClick={salvar} disabled={salvando} variant="secondary" className="gap-2">
             {salvando ? <Loader2 className="size-4 animate-spin" /> : <Save className="size-4" />}
             Salvar ficha
@@ -368,7 +375,7 @@ function Preencher() {
             type="button"
             size="lg"
             variant={gravandoTudo ? "destructive" : "default"}
-            className="shrink-0 gap-2 rounded-full px-6"
+            className={`shrink-0 gap-2 rounded-full px-6 shadow-lg transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl active:translate-y-0 active:scale-95 ${gravandoTudo ? "animate-pulse" : ""}`}
             disabled={processandoTudo || (gravando !== null && !gravandoTudo)}
             onClick={() => microfone(TUDO)}
           >

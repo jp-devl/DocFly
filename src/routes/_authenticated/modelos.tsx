@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { FileUp, LogOut, Sparkles, Trash2, FileText } from "lucide-react";
 import { toast } from "sonner";
 import { Marca } from "@/components/marca";
+import { TemaToggle } from "@/components/tema-toggle";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { cabecalhoAuth } from "@/lib/sessao";
@@ -207,11 +208,13 @@ function Modelos() {
 
   return (
     <main className="min-h-screen bg-muted/30 pb-20">
-      <header className="border-b border-border bg-card">
+      <header className="sticky top-0 z-20 border-b border-border bg-card/95 backdrop-blur transition-colors">
         <div className="mx-auto flex max-w-3xl items-center justify-between px-5 py-4">
           <Link to="/">
             <Marca tamanho="sm" />
           </Link>
+          <div className="flex items-center gap-2">
+          <TemaToggle />
           <Button
             variant="outline"
             size="sm"
@@ -220,6 +223,7 @@ function Modelos() {
           >
             <LogOut className="size-4" /> Sair
           </Button>
+          </div>
         </div>
       </header>
 
