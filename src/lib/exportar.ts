@@ -21,14 +21,39 @@ function nomeArquivo(nome: string) {
   );
 }
 
-function baixarBlob(blob: Blob, arquivo: string) {
-  const url = URL.createObjectURL(blob);
+async function baixarBlob(blob: Blob, arquivo: string, tipo: string) {
+  const file = new File([blob], arquivo, { type: tipo });
+
+  // iOS/Android: o link de download costuma ser bloqueado; usa a folha de
+  // compartilhamento (Salvar em Arquivos / Downloads) quando disponível.
+  const nav = navigator as Navigator & {
+    canShare?: (data: { files: File[] }) => boolean;
+    share?: (data: { files: File[]; title?: string }) => Promise<void>;
+  };
+  const ehMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+  if (ehMobile && nav.canShare?.({ files: [file] }) && nav.share) {
+    try {
+      await nav.share({ files: [file], title: arquivo });
+      return;
+    } catch (err) {
+      if ((err as DOMException)?.name === "AbortError") return;
+    }
+  }
+
+  const url = URL.createObjectURL(file);
   const a = document.createElement("a");
   a.href = url;
   a.download = arquivo;
+  a.rel = "noopener";
+  a.target = "_blank";
+  document.body.appendChild(a);
   a.click();
-  URL.revokeObjectURL(url);
+  setTimeout(() => {
+    a.remove();
+    URL.revokeObjectURL(url);
+  }, 15000);
 }
+
 
 const VAZIO = "____________________";
 
