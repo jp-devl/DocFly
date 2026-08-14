@@ -265,7 +265,13 @@ function Preencher() {
                       {gravandoEssa ? "Parar" : "Falar"}
                     </Button>
                   </div>
+                  {secao.nota && (
+                    <p className="mt-2 whitespace-pre-line rounded-lg bg-muted/60 px-3 py-2 text-xs italic text-foreground">
+                      {secao.nota}
+                    </p>
+                  )}
                   <p className="mt-2 text-xs text-muted-foreground">{secao.dica}</p>
+
 
                   <div className="mt-4 space-y-3">
                     {secao.campos.map((campo) => {
