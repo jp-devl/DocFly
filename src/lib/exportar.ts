@@ -104,10 +104,14 @@ export async function baixarWord(nome: string, estrutura: Estrutura, valores: Va
   });
 
   const blob = await Packer.toBlob(doc);
-  baixarBlob(blob, `${nomeArquivo(nome)}.docx`);
+  await baixarBlob(
+    blob,
+    `${nomeArquivo(nome)}.docx`,
+    "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+  );
 }
 
-export function baixarPdf(nome: string, estrutura: Estrutura, valores: Valores) {
+export async function baixarPdf(nome: string, estrutura: Estrutura, valores: Valores) {
   const pdf = new jsPDF({ unit: "pt", format: "letter" });
   const margem = 56;
   const largura = pdf.internal.pageSize.getWidth() - margem * 2;
@@ -154,5 +158,5 @@ export function baixarPdf(nome: string, estrutura: Estrutura, valores: Valores) 
     });
   });
 
-  pdf.save(`${nomeArquivo(nome)}.pdf`);
+  await baixarBlob(pdf.output("blob"), `${nomeArquivo(nome)}.pdf`, "application/pdf");
 }
