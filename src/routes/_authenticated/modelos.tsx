@@ -2,6 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { FileUp, LogOut, Sparkles, Trash2, FileText } from "lucide-react";
 import { toast } from "sonner";
+import { Marca } from "@/components/marca";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { cabecalhoAuth } from "@/lib/sessao";
@@ -13,12 +14,12 @@ import { ConsoleLeitura } from "@/components/console-leitura";
 export const Route = createFileRoute("/_authenticated/modelos")({
   head: () => ({
     meta: [
-      { title: "Meus modelos | Vozforma" },
+      { title: "Meus modelos | VOZA" },
       {
         name: "description",
         content: "Envie documentos e gerencie os modelos de formulário que você preenche por voz.",
       },
-      { property: "og:title", content: "Meus modelos | Vozforma" },
+      { property: "og:title", content: "Meus modelos | VOZA" },
       { property: "og:description", content: "Seus formulários de voz, sempre à mão." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
@@ -208,8 +209,8 @@ function Modelos() {
     <main className="min-h-screen bg-muted/30 pb-20">
       <header className="border-b border-border bg-card">
         <div className="mx-auto flex max-w-3xl items-center justify-between px-5 py-4">
-          <Link to="/" className="text-lg font-bold tracking-tight text-foreground">
-            Voz<span className="text-primary">forma</span>
+          <Link to="/">
+            <Marca tamanho="sm" />
           </Link>
           <Button
             variant="outline"

@@ -78,16 +78,21 @@ export async function lerDocumento(file: File): Promise<ConteudoDocumento> {
   return { tipo: "texto", texto: new TextDecoder().decode(bytes) };
 }
 
-const INSTRUCAO = `Você transforma documentos e formulários em um app de preenchimento por voz, em português do Brasil.
-Leia o documento e devolve SOMENTE um objeto JSON com este formato:
-{"nome":"título curto do documento","descricao":"uma frase sobre o documento","secoes":[{"id":"identificador_curto","titulo":"Nome da seção","dica":"instrução curta do que a pessoa deve falar","campos":[{"chave":"identificador_sem_acento","rotulo":"Rótulo do campo","tipo":"texto|numero|data|opcao|simnao","opcoes":["A","B"],"longo":true}]}]}
-Regras:
-- Cada lacuna, linha pontilhada, parêntese de marcar ou item a preencher do documento vira um campo.
-- Use "opcao" quando o documento oferece alternativas (marque uma), listando-as em "opcoes".
-- Use "simnao" para itens de sim/não, "data" para datas, "numero" para valores e áreas.
+const INSTRUCAO = `Você reproduz documentos e formulários dentro de um app de preenchimento por voz, em português do Brasil.
+Sua tarefa é COPIAR o documento fielmente, campo por campo, sem resumir e sem reorganizar.
+Devolva SOMENTE um objeto JSON com este formato:
+{"nome":"título exatamente como está no documento","descricao":"uma frase sobre o documento","secoes":[{"id":"identificador_curto","titulo":"Título da seção como aparece no documento","nota":"texto fixo/observação impressa nessa parte, se houver","dica":"instrução curta do que a pessoa deve falar","campos":[{"chave":"identificador_sem_acento","rotulo":"Rótulo do campo exatamente como está escrito no documento","tipo":"texto|numero|data|opcao|simnao","opcoes":["A","B"],"longo":true}]}]}
+Regras de fidelidade (obrigatórias):
+- Transcreva TODOS os campos do documento, do começo ao fim, na mesma ordem em que aparecem. Não pule nenhum, mesmo que pareça repetido.
+- Mantenha o texto dos rótulos e dos títulos de seção IDÊNTICO ao documento (mesma redação, abreviações, pontuação e maiúsculas quando forem do original). Não traduza, não reescreva, não "melhore".
+- Se um bloco se repete (ex.: Sócio 1, Sócio 2, Sócio 3), crie uma seção separada para cada repetição, com o número correspondente.
+- Cada lacuna, linha pontilhada, tabela, parêntese de marcar ou item a preencher vira um campo.
+- Textos impressos que não são campos (observações, avisos, instruções do formulário) vão em "nota" da seção, sem virar campo.
+- Use "opcao" quando o documento oferece alternativas para marcar, listando-as em "opcoes" exatamente como escritas.
+- Use "simnao" para itens de sim/não, "data" para datas, "numero" para valores, quantidades e áreas.
 - "longo": true para campos de texto extenso (nomes completos, endereços, descrições).
-- Agrupe os campos em seções que sigam a ordem do documento (entre 2 e 8 seções).
-- Não invente campos que não existem no documento. Não escreva nada fora do JSON.`;
+- Pode criar quantas seções o documento tiver (até 30). Prefira seguir exatamente as divisões do documento original.
+- Não invente campos que não existem. Não escreva nada fora do JSON.`;
 
 export async function gerarEstruturaDoDocumento(
   conteudo: ConteudoDocumento,

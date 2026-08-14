@@ -12,6 +12,7 @@ export type Secao = {
   id: string;
   titulo: string;
   dica: string;
+  nota?: string;
   campos: Campo[];
 };
 
@@ -69,6 +70,9 @@ export function normalizarEstrutura(input: unknown): Estrutura {
       id: slug(String(s["id"] ?? s["titulo"] ?? ""), `secao_${i}`),
       titulo: String(s["titulo"] ?? `Seção ${i + 1}`).slice(0, 100),
       dica: String(s["dica"] ?? "Fale os dados desta parte do documento.").slice(0, 240),
+      ...(typeof s["nota"] === "string" && s["nota"].trim()
+        ? { nota: s["nota"].trim().slice(0, 400) }
+        : {}),
 
       campos,
     });
