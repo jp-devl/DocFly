@@ -20,13 +20,13 @@ import {
 export const Route = createFileRoute("/_authenticated/modelo/$id")({
   head: () => ({
     meta: [
-      { title: "Preencher por voz | Vozforma" },
+      { title: "Preencher por voz | VOZA" },
       {
         name: "description",
         content: "Fale os dados e veja o documento completo sendo preenchido sozinho.",
       },
-      { property: "og:title", content: "Preencher por voz | Vozforma" },
-      { property: "og:description", content: "Preenchimento de documentos por voz no Vozforma." },
+      { property: "og:title", content: "Preencher por voz | VOZA" },
+      { property: "og:description", content: "Preenchimento de documentos por voz no VOZA." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],

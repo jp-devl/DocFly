@@ -12,12 +12,12 @@ import { mensagemErro } from "@/lib/erros";
 export const Route = createFileRoute("/auth")({
   head: () => ({
     meta: [
-      { title: "Entrar no Vozforma" },
+      { title: "Entrar no VOZA" },
       {
         name: "description",
-        content: "Acesse sua conta Vozforma para enviar documentos e preencher formulários falando.",
+        content: "Acesse sua conta VOZA para enviar documentos e preencher formulários falando.",
       },
-      { property: "og:title", content: "Entrar no Vozforma" },
+      { property: "og:title", content: "Entrar no VOZA" },
       { property: "og:description", content: "Entre com e-mail e senha ou com sua conta Google." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
@@ -56,7 +56,7 @@ function AuthPage() {
         });
         if (error) throw error;
         if (data.session) {
-          toast.success("Conta criada! Bem-vindo ao Vozforma.");
+          toast.success("Conta criada! Bem-vindo ao VOZA.");
         } else {
           setAguardandoEmail(true);
           toast.success("Confirme seu e-mail para ativar a conta.");
@@ -90,7 +90,7 @@ function AuthPage() {
     <main className="flex min-h-screen items-center justify-center bg-muted/40 px-5 py-12">
       <div className="w-full max-w-sm">
         <Link to="/" className="block text-center text-lg font-bold tracking-tight text-foreground">
-          Voz<span className="text-primary">forma</span>
+          VOZA
         </Link>
 
         <div className="mt-6 rounded-2xl border border-border bg-card p-6 shadow-sm">

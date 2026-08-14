@@ -6,13 +6,13 @@ import { useSessao } from "@/lib/sessao";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Vozforma — preencha qualquer formulário falando" },
+      { title: "VOZA — preencha qualquer formulário falando" },
       {
         name: "description",
         content:
-          "Envie um documento em Word, PDF ou foto, o Vozforma identifica os campos e você preenche tudo falando, sem digitar.",
+          "Envie um documento em Word, PDF ou foto, o VOZA identifica os campos e você preenche tudo falando, sem digitar.",
       },
-      { property: "og:title", content: "Vozforma — preencha qualquer formulário falando" },
+      { property: "og:title", content: "VOZA — preencha qualquer formulário falando" },
       {
         property: "og:description",
         content: "Seu documento vira um formulário de voz: fale e os campos se preenchem sozinhos.",
@@ -33,7 +33,7 @@ function Landing() {
       <header className="border-b border-border">
         <div className="mx-auto flex max-w-5xl items-center justify-between px-5 py-4">
           <span className="text-lg font-bold tracking-tight text-foreground">
-            Voz<span className="text-primary">forma</span>
+            VOZA
           </span>
           <Button asChild size="sm" variant={session ? "default" : "outline"}>
             <Link to={destino}>{session ? "Meus modelos" : "Entrar"}</Link>
@@ -49,7 +49,7 @@ function Landing() {
           Envie o documento. Fale. Está preenchido.
         </h1>
         <p className="mx-auto mt-4 max-w-xl text-base text-muted-foreground">
-          O Vozforma lê seu formulário em Word, PDF ou foto, descobre sozinho quais são as lacunas e
+          O VOZA lê seu formulário em Word, PDF ou foto, descobre sozinho quais são as lacunas e
           transforma tudo em campos que você preenche apenas falando.
         </p>
         <div className="mt-8 flex flex-wrap justify-center gap-3">
