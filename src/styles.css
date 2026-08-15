@@ -249,8 +249,18 @@ button {
   animation: fade-in 0.35s ease-out both;
 }
 
+@keyframes float-soft {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+}
+
+.animate-float {
+  animation: float-soft 2.8s ease-in-out infinite;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .animate-fade-in { animation: none; }
+  .animate-float { animation: none; }
   body, header, main, article, section, input, button { transition: none; }
 }
 
