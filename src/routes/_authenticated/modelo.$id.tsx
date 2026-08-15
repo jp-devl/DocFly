@@ -204,6 +204,11 @@ function Preencher() {
       await baixarOriginalPreenchido();
       return;
     }
+    if (arquivoNome && !podePreencherOriginal(arquivoNome)) {
+      toast.info("Este modelo veio de um arquivo .doc antigo.", {
+        description: "Envie o mesmo documento em .docx ou PDF para baixar o original preenchido.",
+      });
+    }
     setBaixando(true);
     try {
       await baixarWord(nome, estrutura, valores);
