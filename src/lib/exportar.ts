@@ -21,7 +21,7 @@ function nomeArquivo(nome: string) {
   );
 }
 
-async function baixarBlob(blob: Blob, arquivo: string, tipo: string) {
+export async function baixarBlob(blob: Blob, arquivo: string, tipo: string) {
   const file = new File([blob], arquivo, { type: tipo });
 
   // iOS/Android: o link de download costuma ser bloqueado; usa a folha de

@@ -9,7 +9,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { cabecalhoAuth } from "@/lib/sessao";
 import { startRecording } from "@/lib/recorder";
 import { mensagemErro } from "@/lib/erros";
-import { baixarPdf, baixarWord } from "@/lib/exportar";
+import { baixarBlob, baixarPdf, baixarWord } from "@/lib/exportar";
+import { podePreencherOriginal, preencherArquivoOriginal } from "@/lib/preencher-original";
 import {
   normalizarEstrutura,
   todosOsCampos,
@@ -51,13 +52,15 @@ function Preencher() {
   const [preenchidos, setPreenchidos] = useState<string[]>([]);
   const [salvando, setSalvando] = useState(false);
   const [baixando, setBaixando] = useState(false);
+  const [arquivoPath, setArquivoPath] = useState<string | null>(null);
+  const [arquivoNome, setArquivoNome] = useState<string | null>(null);
   const recorderRef = useRef<Stop | null>(null);
 
   useEffect(() => {
     void (async () => {
       const { data, error } = await supabase
         .from("modelos")
-        .select("nome, estrutura")
+        .select("nome, estrutura, arquivo_path, arquivo_nome")
         .eq("id", id)
         .maybeSingle();
       if (error || !data) {
@@ -66,6 +69,8 @@ function Preencher() {
         return;
       }
       setNome(data.nome);
+      setArquivoPath(data.arquivo_path);
+      setArquivoNome(data.arquivo_nome);
       setEstrutura(normalizarEstrutura(data.estrutura));
       setCarregando(false);
     })();
@@ -163,7 +168,42 @@ function Preencher() {
     toast.success("Ficha salva na sua conta.");
   }
 
+  const temOriginal = Boolean(arquivoPath) && podePreencherOriginal(arquivoNome);
+
+  /** Preenche o PRÓPRIO arquivo enviado, mantendo layout, logo e paginação. */
+  async function baixarOriginalPreenchido() {
+    setBaixando(true);
+    try {
+      const { data, error } = await supabase.storage
+        .from("documentos")
+        .download(arquivoPath as string);
+      if (error || !data) throw new Error("Não encontrei o arquivo original.");
+      const r = await preencherArquivoOriginal(
+        data,
+        arquivoNome ?? "documento.docx",
+        estrutura,
+        valores,
+      );
+      await baixarBlob(r.blob, r.arquivo, r.mime);
+      if (r.faltando.length > 0) {
+        toast.warning(`${r.preenchidos} campo(s) preenchidos no documento original.`, {
+          description: `Sem lugar exato no arquivo: ${r.faltando.slice(0, 4).join(", ")}${r.faltando.length > 4 ? "…" : ""}`,
+        });
+      } else {
+        toast.success("Documento original preenchido. Escolha onde salvar.");
+      }
+    } catch (err) {
+      toast.error(mensagemErro(err, "Não consegui preencher o documento original."));
+    } finally {
+      setBaixando(false);
+    }
+  }
+
   async function exportarWord() {
+    if (temOriginal) {
+      await baixarOriginalPreenchido();
+      return;
+    }
     setBaixando(true);
     try {
       await baixarWord(nome, estrutura, valores);
@@ -344,10 +384,10 @@ function Preencher() {
           </Button>
           <Button onClick={exportarWord} disabled={baixando} className="gap-2">
             {baixando ? <Loader2 className="size-4 animate-spin" /> : <FileType2 className="size-4" />}
-            Baixar Word
+            {temOriginal ? "Baixar documento original preenchido" : "Baixar Word"}
           </Button>
-          <Button onClick={exportarPdf} variant="outline" className="gap-2">
-            <FileText className="size-4" /> Baixar PDF
+          <Button onClick={exportarPdf} disabled={baixando} variant="outline" className="gap-2">
+            <FileText className="size-4" /> {temOriginal ? "Baixar cópia simples (PDF)" : "Baixar PDF"}
           </Button>
           <Button
             variant="ghost"
