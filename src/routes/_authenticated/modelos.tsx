@@ -224,32 +224,40 @@ function Modelos() {
   }
 
   return (
-    <main className="min-h-screen bg-muted/30 pb-20">
-      <header className="sticky top-0 z-20 border-b border-border bg-card/95 backdrop-blur transition-colors">
-        <div className="mx-auto flex max-w-3xl items-center justify-between px-5 py-4">
-          <Link to="/">
+    <main className="min-h-screen bg-gradient-to-b from-muted/40 via-background to-background pb-24">
+      <header className="sticky top-0 z-20 border-b border-border/70 bg-card/80 backdrop-blur-xl transition-colors">
+        <div className="mx-auto grid max-w-3xl grid-cols-[minmax(0,1fr)_auto] items-center gap-3 px-4 py-3 sm:px-6">
+          <Link to="/" className="min-w-0 transition-transform duration-200 active:scale-95">
             <Marca tamanho="sm" />
           </Link>
-          <div className="flex items-center gap-2">
-          <TemaToggle />
-          <Button
-            variant="outline"
-            size="sm"
-            className="gap-2 rounded-xl border-border/80 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md active:translate-y-0"
-            onClick={sair}
-          >
-            <LogOut className="size-4" /> Sair
-          </Button>
+          <div className="flex shrink-0 items-center gap-2">
+            <TemaToggle />
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-9 gap-2 rounded-full border-border/80 px-3 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md active:translate-y-0 active:scale-95"
+              onClick={sair}
+            >
+              <LogOut className="size-4" />
+              <span className="hidden sm:inline">Sair</span>
+            </Button>
           </div>
         </div>
       </header>
 
-      <div className="mx-auto max-w-3xl px-5 py-7">
-        <h1 className="text-2xl font-bold text-foreground">Meus modelos</h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Envie um formulário em Word, PDF, texto ou foto. Eu descubro os campos e você preenche
-          falando.
-        </p>
+      <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6">
+        <div className="animate-fade-in">
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-primary/20 bg-primary/5 px-3 py-1 text-[11px] font-medium uppercase tracking-wide text-primary">
+            <Sparkles className="size-3" /> Formulários por voz
+          </span>
+          <h1 className="mt-3 text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
+            Meus modelos
+          </h1>
+          <p className="mt-2 max-w-xl text-sm leading-relaxed text-muted-foreground sm:text-base">
+            Envie um formulário em Word, PDF, texto ou foto. Eu descubro os campos e você preenche
+            falando.
+          </p>
+        </div>
 
         <input
           ref={inputRef}
@@ -263,7 +271,7 @@ function Modelos() {
         />
 
         {enviando ? (
-          <div className="mt-5">
+          <div className="mt-6 animate-fade-in">
             <ConsoleLeitura
               arquivo={nomeArquivo}
               etapa={etapa}
@@ -281,77 +289,160 @@ function Modelos() {
             />
           </div>
         ) : (
-          <div className="mt-5 rounded-2xl border border-dashed border-primary/40 bg-card p-6 text-center">
-            <FileUp className="mx-auto size-7 text-primary" />
-            <p className="mt-3 text-sm font-medium text-foreground">
+          <div
+            onDragOver={(e) => {
+              e.preventDefault();
+              setArrastando(true);
+            }}
+            onDragLeave={() => setArrastando(false)}
+            onDrop={(e) => {
+              e.preventDefault();
+              setArrastando(false);
+              const f = e.dataTransfer.files?.[0];
+              if (f) void enviarArquivo(f);
+            }}
+            className={`group mt-6 animate-fade-in rounded-3xl border-2 border-dashed p-7 text-center shadow-sm transition-all duration-300 sm:p-9 ${
+              arrastando
+                ? "-translate-y-0.5 border-primary bg-primary/10 shadow-lg"
+                : "border-primary/25 bg-card hover:-translate-y-0.5 hover:border-primary/50 hover:shadow-lg active:translate-y-0 active:scale-[0.995]"
+            }`}
+          >
+            <div className="mx-auto grid size-14 place-items-center rounded-2xl bg-primary/10 text-primary transition-transform duration-300 group-hover:scale-105">
+              <FileUp className={`size-6 ${arrastando ? "" : "animate-float"}`} />
+            </div>
+            <p className="mt-4 text-base font-semibold text-foreground">
               Enviar um documento com lacunas
             </p>
-            <p className="mt-1 text-xs text-muted-foreground">
+            <p className="mt-1 text-xs text-muted-foreground sm:text-sm">
               Word, PDF, texto ou foto — até 60 MB
             </p>
-            <div className="mt-4 flex flex-wrap justify-center gap-2">
+            <div className="mt-5 flex flex-col items-stretch gap-2.5 sm:flex-row sm:justify-center">
               <Button
+                size="lg"
                 onClick={() => inputRef.current?.click()}
-                className="gap-2 rounded-xl px-5 shadow-md transition-all hover:-translate-y-0.5 hover:shadow-lg active:translate-y-0"
+                className="h-12 gap-2 rounded-2xl px-7 text-base font-semibold shadow-lg shadow-primary/20 transition-all duration-200 hover:-translate-y-0.5 hover:scale-[1.02] hover:shadow-xl hover:shadow-primary/25 active:translate-y-0 active:scale-[0.98]"
               >
-                <FileUp className="size-4" /> Escolher arquivo
+                <FileUp className="size-5" /> Escolher arquivo
               </Button>
               <Button
-                variant="outline"
+                variant="ghost"
+                size="lg"
                 onClick={criarExemplo}
-                className="gap-2 rounded-xl px-5 border-primary/40 text-primary shadow-sm transition-all hover:-translate-y-0.5 hover:bg-primary/5 hover:shadow-md active:translate-y-0"
+                className="h-12 gap-2 rounded-2xl px-6 text-sm font-medium text-muted-foreground transition-all duration-200 hover:bg-accent hover:text-foreground active:scale-[0.98]"
               >
                 <Sparkles className="size-4" /> Usar modelo de exemplo
               </Button>
             </div>
+            <p className="mt-4 hidden text-xs text-muted-foreground sm:block">
+              ou arraste e solte o arquivo aqui
+            </p>
           </div>
         )}
 
-
-        <div className="mt-7 space-y-3">
+        <div className="mt-9">
           {carregando ? (
-            <p className="text-sm text-muted-foreground">Carregando…</p>
+            <div className="space-y-3">
+              {[0, 1].map((i) => (
+                <div key={i} className="h-20 animate-pulse rounded-2xl bg-muted/60" />
+              ))}
+            </div>
           ) : modelos.length === 0 ? (
-            <p className="text-sm text-muted-foreground">
-              Nenhum modelo ainda. Envie seu primeiro documento acima.
-            </p>
+            <div className="animate-fade-in rounded-3xl border border-border/70 bg-card/60 px-6 py-12 text-center">
+              <div className="mx-auto grid size-12 place-items-center rounded-2xl bg-muted text-muted-foreground">
+                <Inbox className="size-5" />
+              </div>
+              <p className="mt-4 text-sm font-semibold text-foreground">Nenhum modelo ainda</p>
+              <p className="mx-auto mt-1 max-w-xs text-xs leading-relaxed text-muted-foreground">
+                Os documentos que você enviar aparecerão aqui, prontos para preencher por voz.
+              </p>
+            </div>
           ) : (
-            modelos.map((m) => {
-              const campos = normalizarEstrutura(m.estrutura).reduce(
-                (n, s) => n + s.campos.length,
-                0,
-              );
-              return (
-                <div
-                  key={m.id}
-                  className="flex items-center gap-3 rounded-2xl border border-border bg-card p-4"
-                >
-                  <FileText className="size-5 shrink-0 text-primary" />
-                  <Link
-                    to="/modelo/$id"
-                    params={{ id: m.id }}
-                    className="min-w-0 flex-1"
-                  >
-                    <p className="truncate font-medium text-foreground">{m.nome}</p>
-                    <p className="truncate text-xs text-muted-foreground">
-                      {campos} campos {m.arquivo_nome ? `· ${m.arquivo_nome}` : ""}
-                    </p>
-                  </Link>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    aria-label={`Excluir ${m.nome}`}
-                    className="min-h-11 min-w-11 shrink-0 rounded-xl text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive"
-                    onClick={() => excluir(m.id)}
-                  >
-                    <Trash2 className="size-4" />
-                  </Button>
-                </div>
-              );
-            })
+            <>
+              <div className="mb-3 flex items-center justify-between">
+                <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+                  Documentos
+                </h2>
+                <span className="text-xs text-muted-foreground">{modelos.length}</span>
+              </div>
+              <div className="space-y-3">
+                {modelos.map((m, i) => {
+                  const campos = normalizarEstrutura(m.estrutura).reduce(
+                    (n, s) => n + s.campos.length,
+                    0,
+                  );
+                  const nomeArq = m.arquivo_nome ?? "";
+                  const tipo = nomeArq.includes(".")
+                    ? nomeArq.slice(nomeArq.lastIndexOf(".") + 1).toUpperCase()
+                    : "MODELO";
+                  const data = new Date(m.created_at).toLocaleDateString("pt-BR", {
+                    day: "2-digit",
+                    month: "short",
+                    year: "numeric",
+                  });
+                  return (
+                    <div
+                      key={m.id}
+                      style={{ animationDelay: `${Math.min(i, 8) * 45}ms` }}
+                      className="animate-fade-in group flex items-center gap-3 rounded-2xl border border-border/70 bg-card p-4 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-lg active:translate-y-0"
+                    >
+                      <div className="grid size-11 shrink-0 place-items-center rounded-xl bg-primary/10 text-primary">
+                        <FileText className="size-5" />
+                      </div>
+                      <Link to="/modelo/$id" params={{ id: m.id }} className="min-w-0 flex-1">
+                        <p className="truncate font-semibold text-foreground">{m.nome}</p>
+                        <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px] text-muted-foreground">
+                          <span className="rounded-md bg-muted px-1.5 py-0.5 font-medium">
+                            {tipo}
+                          </span>
+                          <span>{data}</span>
+                          {campos > 0 ? <span>· {campos} campos</span> : null}
+                        </div>
+                      </Link>
+                      <Button
+                        asChild
+                        variant="ghost"
+                        size="icon"
+                        aria-label={`Abrir ${m.nome}`}
+                        className="hidden min-h-11 min-w-11 shrink-0 rounded-xl text-muted-foreground transition-all hover:bg-primary/10 hover:text-primary sm:inline-flex"
+                      >
+                        <Link to="/modelo/$id" params={{ id: m.id }}>
+                          <ArrowRight className="size-4" />
+                        </Link>
+                      </Button>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            aria-label={`Opções de ${m.nome}`}
+                            className="min-h-11 min-w-11 shrink-0 rounded-xl text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+                          >
+                            <MoreHorizontal className="size-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="rounded-xl">
+                          <DropdownMenuItem asChild>
+                            <Link to="/modelo/$id" params={{ id: m.id }}>
+                              <ArrowRight className="size-4" /> Continuar preenchendo
+                            </Link>
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            className="text-destructive focus:text-destructive"
+                            onClick={() => excluir(m.id)}
+                          >
+                            <Trash2 className="size-4" /> Excluir
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </div>
+                  );
+                })}
+              </div>
+            </>
           )}
         </div>
       </div>
     </main>
   );
 }
+
