@@ -1,16 +1,32 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
-import { FileUp, LogOut, Sparkles, Trash2, FileText } from "lucide-react";
+import {
+  FileUp,
+  LogOut,
+  Sparkles,
+  Trash2,
+  FileText,
+  MoreHorizontal,
+  ArrowRight,
+  Inbox,
+} from "lucide-react";
 import { toast } from "sonner";
 import { Marca } from "@/components/marca";
 import { TemaToggle } from "@/components/tema-toggle";
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { supabase } from "@/integrations/supabase/client";
 import { cabecalhoAuth } from "@/lib/sessao";
 import { normalizarEstrutura, type Estrutura } from "@/lib/estrutura";
 import { MODELO_EXEMPLO } from "@/lib/modelo-exemplo";
 import { mensagemErro } from "@/lib/erros";
 import { ConsoleLeitura } from "@/components/console-leitura";
+
 
 export const Route = createFileRoute("/_authenticated/modelos")({
   head: () => ({
