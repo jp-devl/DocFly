@@ -253,3 +253,7 @@ button {
   .animate-fade-in { animation: none; }
   body, header, main, article, section, input, button { transition: none; }
 }
+
+#lovable-badge {
+  display: none !important;
+}
