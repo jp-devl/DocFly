@@ -214,9 +214,9 @@ async function preencherPdf(
   for (let p = 1; p <= doc.numPages; p++) {
     const pagina = await doc.getPage(p);
     const conteudo = await pagina.getTextContent();
-    const itens = conteudo.items.filter(
-      (i): i is { str: string; width: number; height: number; transform: number[] } =>
-        typeof (i as { str?: unknown }).str === "string",
+    type ItemTexto = { str: string; width: number; height: number; transform: number[] };
+    const itens = (conteudo.items as unknown[]).filter(
+      (i): i is ItemTexto => typeof (i as { str?: unknown }).str === "string",
     );
 
     let plano = "";
