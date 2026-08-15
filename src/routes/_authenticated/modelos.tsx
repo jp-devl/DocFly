@@ -104,6 +104,7 @@ function Modelos() {
   const [etapa, setEtapa] = useState("");
   const [nomeArquivo, setNomeArquivo] = useState("");
   const [erro, setErro] = useState<{ erro: string; motivo: string } | null>(null);
+  const [arrastando, setArrastando] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
   async function carregar() {
