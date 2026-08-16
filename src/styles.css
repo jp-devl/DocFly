@@ -321,6 +321,8 @@ button {
 
 @media (prefers-reduced-motion: reduce) {
   .animate-fade-in { animation: none; }
+  .animate-scale-in { animation: none; }
+
   .animate-float { animation: none; }
   .voza-camada { animation: none; opacity: 0.28; }
   body, header, main, article, section, input, button { transition: none; }
