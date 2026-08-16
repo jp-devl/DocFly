@@ -81,6 +81,14 @@ function Preencher() {
 
   const total = todosOsCampos(estrutura).length;
   const feitos = todosOsCampos(estrutura).filter((c) => (valores[c.chave] ?? "").trim()).length;
+  const restantes = total - feitos;
+  const pct = total ? Math.round((feitos / total) * 100) : 0;
+  const completo = total > 0 && feitos === total;
+  const pendentes = todosOsCampos(estrutura)
+    .filter((c) => !(valores[c.chave] ?? "").trim())
+    .slice(0, 3)
+    .map((c) => c.rotulo);
+
 
   async function microfone(alvo: string) {
     const campos: Campo[] =
