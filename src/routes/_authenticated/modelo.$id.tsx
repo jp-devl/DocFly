@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
-import { ArrowLeft, FileText, FileType2, Loader2, Mic, RotateCcw, Save, Square } from "lucide-react";
+import { ArrowLeft, CheckCircle2, FileText, FileType2, Loader2, Mic, RotateCcw, Save, Square } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { TemaToggle } from "@/components/tema-toggle";
