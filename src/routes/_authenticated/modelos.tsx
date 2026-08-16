@@ -9,6 +9,8 @@ import {
   MoreHorizontal,
   ArrowRight,
   Inbox,
+  ShieldCheck,
+  FileCheck2,
 } from "lucide-react";
 import { toast } from "sonner";
 import { Marca } from "@/components/marca";
