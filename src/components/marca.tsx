@@ -1,9 +1,19 @@
 import { cn } from "@/lib/utils";
 
 /**
- * Marca VOZA — letreiro em estilo "worm": letras tubulares, arredondadas,
- * sem contra-formas duras, muito espaçadas e em caixa alta.
+ * Marca VOZA — letreiro graffiti/street 3D com efeito de "elevação infinita":
+ * cópias do próprio letreiro viajam em perspectiva atrás do logo principal,
+ * criando um túnel visual em loop contínuo.
  */
+const CAMADAS = [
+  { atraso: "0s", cor: "text-foreground/70" },
+  { atraso: "-0.9s", cor: "text-primary/70" },
+  { atraso: "-1.8s", cor: "text-foreground/60" },
+  { atraso: "-2.7s", cor: "text-primary/55" },
+  { atraso: "-3.6s", cor: "text-foreground/45" },
+  { atraso: "-4.5s", cor: "text-primary/40" },
+];
+
 export function Marca({
   className,
   tamanho = "md",
@@ -12,21 +22,35 @@ export function Marca({
   tamanho?: "sm" | "md" | "lg";
 }) {
   const tamanhos = {
-    sm: "text-lg",
-    md: "text-2xl",
-    lg: "text-5xl sm:text-6xl",
+    sm: "text-base sm:text-lg",
+    md: "text-xl sm:text-2xl",
+    lg: "text-4xl sm:text-6xl",
   } as const;
 
   return (
     <span
       aria-label="VOZA"
+      role="img"
       className={cn(
-        "select-none font-marca font-medium uppercase leading-none tracking-[0.06em] text-primary",
+        "voza-marca select-none font-marca uppercase tracking-[0.04em]",
         tamanhos[tamanho],
         className,
       )}
     >
-      voza
+      <span aria-hidden className="voza-camadas">
+        {CAMADAS.map((c) => (
+          <span
+            key={c.atraso}
+            className={cn("voza-camada", c.cor)}
+            style={{ animationDelay: c.atraso }}
+          >
+            voza
+          </span>
+        ))}
+      </span>
+      <span aria-hidden className="voza-frente">
+        voza
+      </span>
     </span>
   );
 }
