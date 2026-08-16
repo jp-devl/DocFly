@@ -260,20 +260,21 @@ function Preencher() {
           <div className="flex items-center gap-3">
             <div className="text-right text-xs text-muted-foreground">
               <span className="font-semibold text-foreground transition-all duration-300">
-                {feitos}
-              </span>
-              /{total} campos
+                {pct}%
+              </span>{" "}
+              preenchido
             </div>
             <TemaToggle />
           </div>
         </div>
         <div className="h-1 w-full bg-muted">
           <div
-            className="h-full rounded-r-full bg-primary transition-all duration-500"
-            style={{ width: total ? `${(feitos / total) * 100}%` : "0%" }}
+            className="h-full rounded-r-full bg-primary transition-all duration-700 ease-out"
+            style={{ width: total ? `${pct}%` : "0%" }}
           />
         </div>
       </header>
+
 
       <div className="mx-auto max-w-4xl px-4 py-6">
         {transcricao && (
