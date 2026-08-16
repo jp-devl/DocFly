@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
-import { ArrowLeft, FileText, FileType2, Loader2, Mic, RotateCcw, Save, Square } from "lucide-react";
+import { ArrowLeft, CheckCircle2, FileText, FileType2, Loader2, Mic, RotateCcw, Save, Square } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { TemaToggle } from "@/components/tema-toggle";
@@ -81,6 +81,14 @@ function Preencher() {
 
   const total = todosOsCampos(estrutura).length;
   const feitos = todosOsCampos(estrutura).filter((c) => (valores[c.chave] ?? "").trim()).length;
+  const restantes = total - feitos;
+  const pct = total ? Math.round((feitos / total) * 100) : 0;
+  const completo = total > 0 && feitos === total;
+  const pendentes = todosOsCampos(estrutura)
+    .filter((c) => !(valores[c.chave] ?? "").trim())
+    .slice(0, 3)
+    .map((c) => c.rotulo);
+
 
   async function microfone(alvo: string) {
     const campos: Campo[] =
@@ -260,22 +268,77 @@ function Preencher() {
           <div className="flex items-center gap-3">
             <div className="text-right text-xs text-muted-foreground">
               <span className="font-semibold text-foreground transition-all duration-300">
-                {feitos}
-              </span>
-              /{total} campos
+                {pct}%
+              </span>{" "}
+              preenchido
             </div>
             <TemaToggle />
           </div>
         </div>
         <div className="h-1 w-full bg-muted">
           <div
-            className="h-full rounded-r-full bg-primary transition-all duration-500"
-            style={{ width: total ? `${(feitos / total) * 100}%` : "0%" }}
+            className="h-full rounded-r-full bg-primary transition-all duration-700 ease-out"
+            style={{ width: total ? `${pct}%` : "0%" }}
           />
         </div>
       </header>
 
+
       <div className="mx-auto max-w-4xl px-4 py-6">
+        <div
+          className={`mb-4 animate-fade-in rounded-2xl border bg-card p-4 shadow-sm transition-colors duration-500 sm:p-5 ${
+            completo ? "border-primary/40 bg-primary/5" : "border-border"
+          }`}
+        >
+          {completo ? (
+            <div className="flex items-center gap-3">
+              <span className="grid size-11 shrink-0 animate-scale-in place-items-center rounded-full bg-primary/15 text-primary">
+                <CheckCircle2 className="size-6" />
+              </span>
+              <div className="min-w-0">
+                <p className="text-base font-semibold text-foreground">
+                  Documento preenchido com sucesso.
+                </p>
+                <p className="mt-0.5 text-xs text-muted-foreground">
+                  {total} de {total} campos preenchidos — já pode baixar em Word ou PDF.
+                </p>
+              </div>
+            </div>
+          ) : (
+            <>
+              <div className="flex flex-wrap items-baseline justify-between gap-2">
+                <p className="text-sm font-semibold text-foreground">
+                  Documento {pct}% preenchido
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  {feitos} de {total} campos preenchidos
+                </p>
+              </div>
+              <div className="mt-3 h-2 w-full overflow-hidden rounded-full bg-muted">
+                <div
+                  className="h-full rounded-full bg-primary transition-all duration-700 ease-out"
+                  style={{ width: `${pct}%` }}
+                />
+              </div>
+              <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
+                <span>
+                  <span className="font-semibold text-foreground">{feitos}</span> preenchidos
+                </span>
+                <span>
+                  <span className="font-semibold text-foreground">{restantes}</span> restantes
+                </span>
+                {pendentes.length > 0 && (
+                  <span className="min-w-0 truncate">
+                    A seguir: {pendentes.join(", ")}
+                    {restantes > pendentes.length ? "…" : ""}
+                  </span>
+                )}
+              </div>
+            </>
+          )}
+        </div>
+
+
         {transcricao && (
           <div className="mb-4 animate-fade-in rounded-xl border border-border bg-card p-4 shadow-sm">
             <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">

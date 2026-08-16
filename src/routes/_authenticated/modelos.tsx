@@ -9,6 +9,8 @@ import {
   MoreHorizontal,
   ArrowRight,
   Inbox,
+  ShieldCheck,
+  FileCheck2,
 } from "lucide-react";
 import { toast } from "sonner";
 import { Marca } from "@/components/marca";
@@ -338,6 +340,18 @@ function Modelos() {
             </p>
           </div>
         )}
+
+        <div className="mt-3 flex flex-col gap-2 rounded-2xl border border-border/60 bg-card/50 px-4 py-3 text-xs text-muted-foreground sm:flex-row sm:items-center sm:gap-5">
+          <span className="flex items-center gap-2">
+            <ShieldCheck className="size-3.5 shrink-0 text-primary" />
+            Seus documentos são processados com segurança.
+          </span>
+          <span className="flex items-center gap-2">
+            <FileCheck2 className="size-3.5 shrink-0 text-primary" />
+            Não alteramos o arquivo original.
+          </span>
+        </div>
+
 
         <div className="mt-9">
           {carregando ? (
