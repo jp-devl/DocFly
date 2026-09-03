@@ -157,16 +157,17 @@ function AuthPage() {
             Continuar com Google
           </Button>
 
-          <button
+          <Button
             type="button"
-            className="mt-5 w-full text-center text-sm text-muted-foreground underline-offset-4 hover:underline"
+            variant="ghost"
+            className="mt-5 w-full text-muted-foreground"
             onClick={() => {
               setAguardandoEmail(false);
               setModo(modo === "entrar" ? "criar" : "entrar");
             }}
           >
             {modo === "entrar" ? "Não tenho conta ainda" : "Já tenho conta"}
-          </button>
+          </Button>
         </div>
       </div>
     </main>

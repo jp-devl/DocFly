@@ -11,6 +11,8 @@ import {
   Inbox,
   ShieldCheck,
   FileCheck2,
+  CircleCheck,
+  CalendarDays,
 } from "lucide-react";
 import { toast } from "sonner";
 import { Marca } from "@/components/marca";
@@ -226,7 +228,7 @@ function Modelos() {
   }
 
   return (
-    <main className="min-h-screen bg-gradient-to-b from-muted/40 via-background to-background pb-24">
+    <main className="min-h-screen bg-muted/60 pb-24">
       <header className="sticky top-0 z-20 border-b border-border/70 bg-card/80 backdrop-blur-xl transition-colors">
         <div className="mx-auto grid max-w-3xl grid-cols-[minmax(0,1fr)_auto] items-center gap-3 px-4 py-3 sm:px-6">
           <Link to="/" className="min-w-0 transition-transform duration-200 active:scale-95">
@@ -247,12 +249,12 @@ function Modelos() {
         </div>
       </header>
 
-      <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6">
+      <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6 sm:py-10">
         <div className="animate-fade-in">
           <span className="inline-flex items-center gap-1.5 rounded-full border border-primary/20 bg-primary/5 px-3 py-1 text-[11px] font-medium uppercase tracking-wide text-primary">
             <Sparkles className="size-3" /> Formulários por voz
           </span>
-          <h1 className="mt-3 text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
+          <h1 className="mt-3 text-3xl font-bold text-foreground sm:text-4xl">
             Meus modelos
           </h1>
           <p className="mt-2 max-w-xl text-sm leading-relaxed text-muted-foreground sm:text-base">
@@ -303,13 +305,13 @@ function Modelos() {
               const f = e.dataTransfer.files?.[0];
               if (f) void enviarArquivo(f);
             }}
-            className={`group mt-6 animate-fade-in rounded-3xl border-2 border-dashed p-7 text-center shadow-sm transition-all duration-300 sm:p-9 ${
+            className={`group mt-6 animate-fade-in rounded-2xl border-2 border-dashed p-6 text-center shadow-sm transition-all duration-300 sm:p-8 ${
               arrastando
                 ? "-translate-y-0.5 border-primary bg-primary/10 shadow-lg"
                 : "border-primary/25 bg-card hover:-translate-y-0.5 hover:border-primary/50 hover:shadow-lg active:translate-y-0 active:scale-[0.995]"
             }`}
           >
-            <div className="mx-auto grid size-14 place-items-center rounded-2xl bg-primary/10 text-primary transition-transform duration-300 group-hover:scale-105">
+            <div className="mx-auto grid size-12 place-items-center rounded-xl bg-primary/10 text-primary transition-transform duration-300 group-hover:scale-105">
               <FileUp className={`size-6 ${arrastando ? "" : "animate-float"}`} />
             </div>
             <p className="mt-4 text-base font-semibold text-foreground">
@@ -322,7 +324,7 @@ function Modelos() {
               <Button
                 size="lg"
                 onClick={() => inputRef.current?.click()}
-                className="h-12 gap-2 rounded-2xl px-7 text-base font-semibold shadow-lg shadow-primary/20 transition-all duration-200 hover:-translate-y-0.5 hover:scale-[1.02] hover:shadow-xl hover:shadow-primary/25 active:translate-y-0 active:scale-[0.98]"
+                className="h-12 gap-2 px-7 text-base shadow-lg shadow-primary/20"
               >
                 <FileUp className="size-5" /> Escolher arquivo
               </Button>
@@ -330,7 +332,7 @@ function Modelos() {
                 variant="ghost"
                 size="lg"
                 onClick={criarExemplo}
-                className="h-12 gap-2 rounded-2xl px-6 text-sm font-medium text-muted-foreground transition-all duration-200 hover:bg-accent hover:text-foreground active:scale-[0.98]"
+                className="h-12 gap-2 px-6 text-sm text-muted-foreground hover:text-foreground"
               >
                 <Sparkles className="size-4" /> Usar modelo de exemplo
               </Button>
@@ -355,9 +357,16 @@ function Modelos() {
 
         <div className="mt-9">
           {carregando ? (
-            <div className="space-y-3">
-              {[0, 1].map((i) => (
-                <div key={i} className="h-20 animate-pulse rounded-2xl bg-muted/60" />
+            <div className="space-y-3" aria-label="Carregando documentos">
+              {[0, 1, 2].map((i) => (
+                <div key={i} className="flex items-center gap-4 rounded-2xl border border-border/70 bg-card p-4 shadow-sm">
+                  <div className="skeleton-shimmer size-11 shrink-0 rounded-xl bg-muted" />
+                  <div className="min-w-0 flex-1 space-y-2">
+                    <div className="skeleton-shimmer h-3.5 rounded-md bg-muted" style={{ width: `${62 + i * 8}%` }} />
+                    <div className="skeleton-shimmer h-2.5 w-2/5 rounded-md bg-muted" />
+                  </div>
+                  <div className="skeleton-shimmer size-9 rounded-xl bg-muted" />
+                </div>
               ))}
             </div>
           ) : modelos.length === 0 ? (
@@ -373,8 +382,8 @@ function Modelos() {
           ) : (
             <>
               <div className="mb-3 flex items-center justify-between">
-                <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
-                  Documentos
+                <h2 className="text-xs font-bold uppercase tracking-wide text-muted-foreground">
+                  Documentos recentes
                 </h2>
                 <span className="text-xs text-muted-foreground">{modelos.length}</span>
               </div>
@@ -397,19 +406,21 @@ function Modelos() {
                     <div
                       key={m.id}
                       style={{ animationDelay: `${Math.min(i, 8) * 45}ms` }}
-                      className="animate-fade-in group flex items-center gap-3 rounded-2xl border border-border/70 bg-card p-4 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-lg active:translate-y-0"
+                       className="animate-fade-in group relative flex items-center gap-3 overflow-hidden rounded-2xl border border-border/70 bg-card p-4 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-primary/25 hover:shadow-md active:translate-y-0 active:scale-[0.995]"
                     >
-                      <div className="grid size-11 shrink-0 place-items-center rounded-xl bg-primary/10 text-primary">
+                       <span className="absolute inset-y-3 left-0 w-0.5 rounded-r-full bg-primary/70 opacity-0 transition-opacity group-hover:opacity-100" />
+                       <div className="grid size-11 shrink-0 place-items-center rounded-xl border border-primary/10 bg-primary/5 text-primary transition-transform duration-200 group-hover:scale-105">
                         <FileText className="size-5" />
                       </div>
                       <Link to="/modelo/$id" params={{ id: m.id }} className="min-w-0 flex-1">
                         <p className="truncate font-semibold text-foreground">{m.nome}</p>
-                        <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px] text-muted-foreground">
+                         <div className="mt-1.5 flex flex-wrap items-center gap-x-2.5 gap-y-1 text-[11px] text-muted-foreground">
                           <span className="rounded-md bg-muted px-1.5 py-0.5 font-medium">
                             {tipo}
                           </span>
-                          <span>{data}</span>
+                           <span className="inline-flex items-center gap-1"><CalendarDays className="size-3" />{data}</span>
                           {campos > 0 ? <span>· {campos} campos</span> : null}
+                           <span className="inline-flex items-center gap-1 font-medium text-foreground/70"><CircleCheck className="size-3 text-primary" />Pronto</span>
                         </div>
                       </Link>
                       <Button

@@ -162,11 +162,14 @@ export function ConsoleLeitura({
         ) : (
           <>
             <div className="flex items-center justify-between font-mono text-[11px] text-terminal-muted">
-              <span className="text-terminal-accent">{etapa || "processando…"}</span>
+              <span className="inline-flex items-center gap-2 text-terminal-accent">
+                <span className="size-1.5 animate-pulse rounded-full bg-terminal-accent" />
+                {etapa || "processando…"}
+              </span>
               <span>não feche esta página</span>
             </div>
             <div className="mt-2 h-1 overflow-hidden rounded-full bg-terminal-border">
-              <div className="terminal-progress h-full w-1/3 rounded-full bg-terminal-accent" />
+              <div className="loading-stripe terminal-progress h-full w-1/3 rounded-full" />
             </div>
           </>
         )}
