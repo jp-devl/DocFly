@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { ArrowLeft, CheckCircle2, FileText, FileType2, Loader2, Mic, RotateCcw, Save, Square } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import { TemaToggle } from "@/components/tema-toggle";
 import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
@@ -243,8 +244,23 @@ function Preencher() {
 
   if (carregando) {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-background">
-        <Loader2 className="size-6 animate-spin text-primary" />
+      <main className="min-h-screen bg-muted/40">
+        <div className="border-b border-border bg-card/95 px-5 py-4">
+          <div className="mx-auto flex max-w-4xl items-center gap-3">
+            <Skeleton className="skeleton-shimmer size-10 rounded-xl bg-muted" />
+            <div className="space-y-2">
+              <Skeleton className="skeleton-shimmer h-3 w-24 bg-muted" />
+              <Skeleton className="skeleton-shimmer h-5 w-48 bg-muted" />
+            </div>
+          </div>
+        </div>
+        <div className="mx-auto max-w-4xl space-y-5 px-5 py-8" aria-label="Carregando documento">
+          <div className="flex items-center gap-3 text-sm font-medium text-muted-foreground">
+            <Loader2 className="size-4 animate-spin text-primary" /> Preparando seu documento…
+          </div>
+          <Skeleton className="skeleton-shimmer h-24 rounded-2xl bg-muted" />
+          <Skeleton className="skeleton-shimmer h-72 rounded-2xl bg-muted" />
+        </div>
       </main>
     );
   }
