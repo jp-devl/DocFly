@@ -432,6 +432,13 @@ button {
   .animate-scale-in { animation: none; }
 
   .animate-float { animation: none; }
+  .voza-mic-ouvindo,
+  .voza-mic-onda,
+  .voza-progresso-fill::after,
+  .voza-check-traco { animation: none; }
+  .voza-mic-onda { opacity: 0.2; }
+  .voza-sucesso { animation-duration: 0.01ms; opacity: 1; }
+
   .skeleton-shimmer::after,
   .loading-stripe { animation: none; }
   .voza-camada { animation: none; opacity: 0.28; }
