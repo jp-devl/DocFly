@@ -1,10 +1,12 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
-import { ArrowLeft, CheckCircle2, FileText, FileType2, Loader2, Mic, RotateCcw, Save, Square } from "lucide-react";
+import { ArrowLeft, CheckCircle2, FileText, FileType2, Loader2, RotateCcw, Save } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { TemaToggle } from "@/components/tema-toggle";
+import { MicBotao } from "@/components/mic-botao";
+import { SucessoFlash } from "@/components/sucesso-flash";
 import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
 import { cabecalhoAuth } from "@/lib/sessao";
