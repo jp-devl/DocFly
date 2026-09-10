@@ -383,25 +383,15 @@ function Preencher() {
                     <h3 className="text-sm font-bold uppercase tracking-wider text-foreground">
                       {secao.titulo}
                     </h3>
-                    <Button
-                      type="button"
-                      size="sm"
-                      variant={gravandoEssa ? "destructive" : "outline"}
-                      className={`h-8 shrink-0 gap-1.5 rounded-full px-3 text-xs shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md active:translate-y-0 active:scale-95 ${gravandoEssa ? "animate-pulse" : ""}`}
-                      aria-label={gravandoEssa ? "Parar gravação" : `Falar dados de ${secao.titulo}`}
+                    <MicBotao
+                      ouvindo={gravandoEssa}
+                      processando={ocupada}
+                      rotulo={`Falar dados de ${secao.titulo}`}
                       disabled={ocupada || (gravando !== null && !gravandoEssa)}
                       onClick={() => microfone(secao.id)}
-                    >
-                      {ocupada ? (
-                        <Loader2 className="size-3.5 animate-spin" />
-                      ) : gravandoEssa ? (
-                        <Square className="size-3.5" />
-                      ) : (
-                        <Mic className="size-3.5" />
-                      )}
-                      {gravandoEssa ? "Parar" : "Falar"}
-                    </Button>
+                    />
                   </div>
+
                   {secao.nota && (
                     <p className="mt-2 whitespace-pre-line rounded-lg bg-muted/60 px-3 py-2 text-xs italic text-foreground">
                       {secao.nota}
