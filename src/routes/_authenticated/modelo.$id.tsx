@@ -487,23 +487,14 @@ function Preencher() {
               ? "Ouvindo… fale os dados e toque para parar."
               : "Fale de uma vez só: eu distribuo cada dado no campo certo."}
           </p>
-          <Button
-            type="button"
-            size="lg"
-            variant={gravandoTudo ? "destructive" : "default"}
-            className={`shrink-0 gap-2 rounded-full px-6 shadow-lg transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl active:translate-y-0 active:scale-95 ${gravandoTudo ? "animate-pulse" : ""}`}
+          <MicBotao
+            tamanho="lg"
+            ouvindo={gravandoTudo}
+            processando={processandoTudo}
+            rotulo="Falar tudo"
             disabled={processandoTudo || (gravando !== null && !gravandoTudo)}
             onClick={() => microfone(TUDO)}
-          >
-            {processandoTudo ? (
-              <Loader2 className="size-5 animate-spin" />
-            ) : gravandoTudo ? (
-              <Square className="size-5" />
-            ) : (
-              <Mic className="size-5" />
-            )}
-            {gravandoTudo ? "Parar" : "Falar tudo"}
-          </Button>
+          />
         </div>
       </div>
     </main>
