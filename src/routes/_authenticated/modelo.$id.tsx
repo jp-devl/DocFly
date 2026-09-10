@@ -1,10 +1,12 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
-import { ArrowLeft, CheckCircle2, FileText, FileType2, Loader2, Mic, RotateCcw, Save, Square } from "lucide-react";
+import { ArrowLeft, CheckCircle2, FileText, FileType2, Loader2, RotateCcw, Save } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { TemaToggle } from "@/components/tema-toggle";
+import { MicBotao } from "@/components/mic-botao";
+import { SucessoFlash } from "@/components/sucesso-flash";
 import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
 import { cabecalhoAuth } from "@/lib/sessao";
@@ -381,25 +383,15 @@ function Preencher() {
                     <h3 className="text-sm font-bold uppercase tracking-wider text-foreground">
                       {secao.titulo}
                     </h3>
-                    <Button
-                      type="button"
-                      size="sm"
-                      variant={gravandoEssa ? "destructive" : "outline"}
-                      className={`h-8 shrink-0 gap-1.5 rounded-full px-3 text-xs shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md active:translate-y-0 active:scale-95 ${gravandoEssa ? "animate-pulse" : ""}`}
-                      aria-label={gravandoEssa ? "Parar gravação" : `Falar dados de ${secao.titulo}`}
+                    <MicBotao
+                      ouvindo={gravandoEssa}
+                      processando={ocupada}
+                      rotulo={`Falar dados de ${secao.titulo}`}
                       disabled={ocupada || (gravando !== null && !gravandoEssa)}
                       onClick={() => microfone(secao.id)}
-                    >
-                      {ocupada ? (
-                        <Loader2 className="size-3.5 animate-spin" />
-                      ) : gravandoEssa ? (
-                        <Square className="size-3.5" />
-                      ) : (
-                        <Mic className="size-3.5" />
-                      )}
-                      {gravandoEssa ? "Parar" : "Falar"}
-                    </Button>
+                    />
                   </div>
+
                   {secao.nota && (
                     <p className="mt-2 whitespace-pre-line rounded-lg bg-muted/60 px-3 py-2 text-xs italic text-foreground">
                       {secao.nota}
@@ -495,23 +487,14 @@ function Preencher() {
               ? "Ouvindo… fale os dados e toque para parar."
               : "Fale de uma vez só: eu distribuo cada dado no campo certo."}
           </p>
-          <Button
-            type="button"
-            size="lg"
-            variant={gravandoTudo ? "destructive" : "default"}
-            className={`shrink-0 gap-2 rounded-full px-6 shadow-lg transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl active:translate-y-0 active:scale-95 ${gravandoTudo ? "animate-pulse" : ""}`}
+          <MicBotao
+            tamanho="lg"
+            ouvindo={gravandoTudo}
+            processando={processandoTudo}
+            rotulo="Falar tudo"
             disabled={processandoTudo || (gravando !== null && !gravandoTudo)}
             onClick={() => microfone(TUDO)}
-          >
-            {processandoTudo ? (
-              <Loader2 className="size-5 animate-spin" />
-            ) : gravandoTudo ? (
-              <Square className="size-5" />
-            ) : (
-              <Mic className="size-5" />
-            )}
-            {gravandoTudo ? "Parar" : "Falar tudo"}
-          </Button>
+          />
         </div>
       </div>
     </main>
