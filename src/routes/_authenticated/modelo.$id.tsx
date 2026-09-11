@@ -359,6 +359,22 @@ function Preencher() {
         </div>
 
 
+        {processando !== null && (
+          <div
+            aria-busy="true"
+            className="mb-4 animate-fade-in rounded-xl border border-primary/25 bg-card p-4 shadow-sm"
+          >
+            <p className="flex items-center gap-2 text-sm font-semibold text-foreground">
+              <Loader2 className="size-4 animate-spin text-primary" />
+              Entendendo o que você falou…
+            </p>
+            <div className="mt-3 space-y-2">
+              <div className="skeleton-shimmer h-3 w-4/5 rounded-md bg-muted" />
+              <div className="skeleton-shimmer h-3 w-3/5 rounded-md bg-muted" />
+            </div>
+          </div>
+        )}
+
         {transcricao && (
           <div className="mb-4 animate-fade-in rounded-xl border border-border bg-card p-4 shadow-sm">
             <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
