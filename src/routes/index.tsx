@@ -8,13 +8,13 @@ import { useSessao } from "@/lib/sessao";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "VOZA — preencha qualquer formulário falando" },
+      { title: "Docfly — preencha qualquer formulário falando" },
       {
         name: "description",
         content:
-          "Envie um documento em Word, PDF ou foto, o VOZA identifica os campos e você preenche tudo falando, sem digitar.",
+          "Envie um documento em Word, PDF ou foto, o Docfly identifica os campos e você preenche tudo falando, sem digitar.",
       },
-      { property: "og:title", content: "VOZA — preencha qualquer formulário falando" },
+      { property: "og:title", content: "Docfly — preencha qualquer formulário falando" },
       {
         property: "og:description",
         content: "Seu documento vira um formulário de voz: fale e os campos se preenchem sozinhos.",
@@ -77,7 +77,7 @@ function Landing() {
           <span className="text-primary">Fale.</span> Está preenchido.
         </h1>
         <p className="animate-fade-in mx-auto mt-5 max-w-xl text-base leading-relaxed text-muted-foreground sm:text-lg">
-          O VOZA lê seu formulário em Word, PDF ou foto, descobre sozinho quais são as lacunas e
+          O Docfly lê seu formulário em Word, PDF ou foto, descobre sozinho quais são as lacunas e
           transforma tudo em campos que você preenche apenas falando.
         </p>
         <div className="animate-fade-in mt-9 flex flex-col items-stretch justify-center gap-3 sm:flex-row">

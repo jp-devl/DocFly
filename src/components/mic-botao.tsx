@@ -11,7 +11,7 @@ type Props = {
   className?: string;
 };
 
-/** Botão de microfone com ondas animadas enquanto o VOZA está ouvindo. */
+/** Botão de microfone com ondas animadas enquanto o Docfly está ouvindo. */
 export function MicBotao({
   ouvindo,
   processando,

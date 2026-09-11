@@ -25,13 +25,13 @@ import {
 export const Route = createFileRoute("/_authenticated/modelo/$id")({
   head: () => ({
     meta: [
-      { title: "Preencher por voz | VOZA" },
+      { title: "Preencher por voz | Docfly" },
       {
         name: "description",
         content: "Fale os dados e veja o documento completo sendo preenchido sozinho.",
       },
-      { property: "og:title", content: "Preencher por voz | VOZA" },
-      { property: "og:description", content: "Preenchimento de documentos por voz no VOZA." },
+      { property: "og:title", content: "Preencher por voz | Docfly" },
+      { property: "og:description", content: "Preenchimento de documentos por voz no Docfly." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],

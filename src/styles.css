@@ -421,7 +421,7 @@ button {
 
   .skeleton-shimmer::after,
   .loading-stripe { animation: none; }
-  .voza-camada { animation: none; opacity: 0.28; }
+  .docfly-ponto { animation: none; }
   body, header, main, article, section, input, button { transition: none; }
 }
 

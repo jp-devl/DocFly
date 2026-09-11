@@ -35,12 +35,12 @@ import { ConsoleLeitura } from "@/components/console-leitura";
 export const Route = createFileRoute("/_authenticated/modelos")({
   head: () => ({
     meta: [
-      { title: "Meus modelos | VOZA" },
+      { title: "Meus modelos | Docfly" },
       {
         name: "description",
         content: "Envie documentos e gerencie os modelos de formulário que você preenche por voz.",
       },
-      { property: "og:title", content: "Meus modelos | VOZA" },
+      { property: "og:title", content: "Meus modelos | Docfly" },
       { property: "og:description", content: "Seus formulários de voz, sempre à mão." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
