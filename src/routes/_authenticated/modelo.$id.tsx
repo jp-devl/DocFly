@@ -57,6 +57,7 @@ function Preencher() {
   const [baixando, setBaixando] = useState(false);
   const [arquivoPath, setArquivoPath] = useState<string | null>(null);
   const [arquivoNome, setArquivoNome] = useState<string | null>(null);
+  const [sucesso, setSucesso] = useState<string | null>(null);
   const recorderRef = useRef<Stop | null>(null);
 
   useEffect(() => {
@@ -138,7 +139,7 @@ function Preencher() {
         }
         setValores((v) => ({ ...v, ...novos }));
         setPreenchidos(chaves);
-        toast.success(`${chaves.length} campo(s) preenchido(s)`);
+        setSucesso(`${chaves.length} campo(s) preenchido(s)`);
       } catch (err) {
         toast.error(mensagemErro(err, "Não consegui gravar o áudio. Tente de novo."));
       } finally {
@@ -176,7 +177,7 @@ function Preencher() {
       toast.error("Não consegui salvar a ficha.");
       return;
     }
-    toast.success("Ficha salva na sua conta.");
+    setSucesso("Ficha salva na sua conta.");
   }
 
   const temOriginal = Boolean(arquivoPath) && podePreencherOriginal(arquivoNome);
@@ -201,7 +202,7 @@ function Preencher() {
           description: `Sem lugar exato no arquivo: ${r.faltando.slice(0, 4).join(", ")}${r.faltando.length > 4 ? "…" : ""}`,
         });
       } else {
-        toast.success("Documento original preenchido. Escolha onde salvar.");
+        setSucesso("Documento original preenchido.");
       }
     } catch (err) {
       toast.error(mensagemErro(err, "Não consegui preencher o documento original."));
@@ -223,7 +224,7 @@ function Preencher() {
     setBaixando(true);
     try {
       await baixarWord(nome, estrutura, valores);
-      toast.success("Word pronto. Escolha onde salvar no seu aparelho.");
+      setSucesso("Word pronto para salvar.");
     } catch (err) {
       toast.error(mensagemErro(err, "Não consegui gerar o Word."));
     } finally {
@@ -235,7 +236,7 @@ function Preencher() {
     setBaixando(true);
     try {
       await baixarPdf(nome, estrutura, valores);
-      toast.success("PDF pronto. Escolha onde salvar no seu aparelho.");
+      setSucesso("PDF pronto para salvar.");
     } catch (err) {
       toast.error(mensagemErro(err, "Não consegui gerar o PDF."));
     } finally {
@@ -272,6 +273,7 @@ function Preencher() {
 
   return (
     <main className="min-h-screen bg-muted/40 pb-36">
+      <SucessoFlash mensagem={sucesso} aoFim={() => setSucesso(null)} />
       <header className="sticky top-0 z-20 border-b border-border bg-card/95 backdrop-blur">
         <div className="mx-auto flex max-w-4xl items-center justify-between gap-4 px-5 py-3">
           <div className="min-w-0">
@@ -295,7 +297,7 @@ function Preencher() {
         </div>
         <div className="h-1 w-full bg-muted">
           <div
-            className="h-full rounded-r-full bg-primary transition-all duration-700 ease-out"
+            className="voza-progresso-fill h-full rounded-r-full bg-primary"
             style={{ width: total ? `${pct}%` : "0%" }}
           />
         </div>
@@ -334,7 +336,7 @@ function Preencher() {
               </div>
               <div className="mt-3 h-2 w-full overflow-hidden rounded-full bg-muted">
                 <div
-                  className="h-full rounded-full bg-primary transition-all duration-700 ease-out"
+                  className="voza-progresso-fill h-full rounded-full bg-primary"
                   style={{ width: `${pct}%` }}
                 />
               </div>
