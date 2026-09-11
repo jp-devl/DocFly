@@ -21,7 +21,7 @@
 @theme inline {
   --font-sans: "Manrope", ui-sans-serif, system-ui, sans-serif;
   --font-heading: "Sora", "Manrope", ui-sans-serif, system-ui, sans-serif;
-  --font-marca: "Bungee", "Fredoka", "Manrope", sans-serif;
+  --font-marca: "Sora", "Manrope", ui-sans-serif, system-ui, sans-serif;
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
@@ -378,33 +378,46 @@ button {
 }
 
 
-/* ===== Marca Docfly — wordmark limpo ===== */
+/* ===== Marca DocFly — símbolo em movimento, discreto ===== */
 .docfly-marca {
   position: relative;
-  display: inline-flex;
-  align-items: baseline;
-  line-height: 1;
-  transition: opacity 300ms ease, transform 300ms ease;
+  transition: opacity 300ms ease;
 }
 
 .docfly-marca:hover {
-  opacity: 0.92;
+  opacity: 0.94;
 }
 
-.docfly-ponto {
-  margin-left: 0.12em;
-  width: 0.16em;
-  height: 0.16em;
-  border-radius: 9999px;
-  background: var(--primary);
-  align-self: flex-end;
-  margin-bottom: 0.06em;
-  animation: docfly-ponto 3.6s ease-in-out infinite;
+.docfly-simbolo {
+  color: var(--foreground);
+  overflow: visible;
 }
 
-@keyframes docfly-ponto {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.35; }
+.docfly-doc {
+  transform-origin: 60% 55%;
+  animation: docfly-voo 6s ease-in-out infinite;
+}
+
+.docfly-linhas {
+  animation: docfly-rastro 6s ease-in-out infinite;
+}
+
+.docfly-marca:hover .docfly-doc {
+  animation-duration: 2.4s;
+}
+
+.docfly-marca:hover .docfly-linhas {
+  animation-duration: 2.4s;
+}
+
+@keyframes docfly-voo {
+  0%, 100% { transform: translate3d(0, 0, 0); }
+  50% { transform: translate3d(1.2px, -1.4px, 0); }
+}
+
+@keyframes docfly-rastro {
+  0%, 100% { transform: translateX(0); opacity: 1; }
+  50% { transform: translateX(-2px); opacity: 0.65; }
 }
 
 @media (prefers-reduced-motion: reduce) {
