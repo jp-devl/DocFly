@@ -30,6 +30,7 @@ import { normalizarEstrutura, type Estrutura } from "@/lib/estrutura";
 import { MODELO_EXEMPLO } from "@/lib/modelo-exemplo";
 import { mensagemErro } from "@/lib/erros";
 import { ConsoleLeitura } from "@/components/console-leitura";
+import { EsqueletoFormulario } from "@/components/esqueleto-formulario";
 
 
 export const Route = createFileRoute("/_authenticated/modelos")({
@@ -275,7 +276,7 @@ function Modelos() {
         />
 
         {enviando ? (
-          <div className="mt-6 animate-fade-in">
+          <div className="mt-6 animate-fade-in space-y-4">
             <ConsoleLeitura
               arquivo={nomeArquivo}
               etapa={etapa}
@@ -291,6 +292,7 @@ function Modelos() {
                 window.setTimeout(() => inputRef.current?.click(), 60);
               }}
             />
+            {!erro && <EsqueletoFormulario titulo={etapa || "Montando seu formulário…"} />}
           </div>
         ) : (
           <div
