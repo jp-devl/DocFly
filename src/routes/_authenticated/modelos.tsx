@@ -30,17 +30,18 @@ import { normalizarEstrutura, type Estrutura } from "@/lib/estrutura";
 import { MODELO_EXEMPLO } from "@/lib/modelo-exemplo";
 import { mensagemErro } from "@/lib/erros";
 import { ConsoleLeitura } from "@/components/console-leitura";
+import { EsqueletoFormulario } from "@/components/esqueleto-formulario";
 
 
 export const Route = createFileRoute("/_authenticated/modelos")({
   head: () => ({
     meta: [
-      { title: "Meus modelos | VOZA" },
+      { title: "Meus modelos | Docfly" },
       {
         name: "description",
         content: "Envie documentos e gerencie os modelos de formulário que você preenche por voz.",
       },
-      { property: "og:title", content: "Meus modelos | VOZA" },
+      { property: "og:title", content: "Meus modelos | Docfly" },
       { property: "og:description", content: "Seus formulários de voz, sempre à mão." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
@@ -275,7 +276,7 @@ function Modelos() {
         />
 
         {enviando ? (
-          <div className="mt-6 animate-fade-in">
+          <div className="mt-6 animate-fade-in space-y-4">
             <ConsoleLeitura
               arquivo={nomeArquivo}
               etapa={etapa}
@@ -291,6 +292,7 @@ function Modelos() {
                 window.setTimeout(() => inputRef.current?.click(), 60);
               }}
             />
+            {!erro && <EsqueletoFormulario titulo={etapa || "Montando seu formulário…"} />}
           </div>
         ) : (
           <div

@@ -13,12 +13,12 @@ import { mensagemErro } from "@/lib/erros";
 export const Route = createFileRoute("/auth")({
   head: () => ({
     meta: [
-      { title: "Entrar no VOZA" },
+      { title: "Entrar no Docfly" },
       {
         name: "description",
-        content: "Acesse sua conta VOZA para enviar documentos e preencher formulários falando.",
+        content: "Acesse sua conta Docfly para enviar documentos e preencher formulários falando.",
       },
-      { property: "og:title", content: "Entrar no VOZA" },
+      { property: "og:title", content: "Entrar no Docfly" },
       { property: "og:description", content: "Entre com e-mail e senha ou com sua conta Google." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
@@ -57,7 +57,7 @@ function AuthPage() {
         });
         if (error) throw error;
         if (data.session) {
-          toast.success("Conta criada! Bem-vindo ao VOZA.");
+          toast.success("Conta criada! Bem-vindo ao Docfly.");
         } else {
           setAguardandoEmail(true);
           toast.success("Confirme seu e-mail para ativar a conta.");
