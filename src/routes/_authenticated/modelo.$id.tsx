@@ -211,6 +211,7 @@ function Preencher() {
     }
   }
 
+  /** Fallback: só usado quando não existe arquivo original preenchível. */
   async function exportarWord() {
     if (temOriginal) {
       await baixarOriginalPreenchido();
