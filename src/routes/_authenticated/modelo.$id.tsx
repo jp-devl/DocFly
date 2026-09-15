@@ -211,6 +211,7 @@ function Preencher() {
     }
   }
 
+  /** Fallback: só usado quando não existe arquivo original preenchível. */
   async function exportarWord() {
     if (temOriginal) {
       await baixarOriginalPreenchido();
@@ -320,7 +321,10 @@ function Preencher() {
                   Documento preenchido com sucesso.
                 </p>
                 <p className="mt-0.5 text-xs text-muted-foreground">
-                  {total} de {total} campos preenchidos — já pode baixar em Word ou PDF.
+                  {total} de {total} campos preenchidos —{" "}
+                  {temOriginal
+                    ? "baixe o seu documento original já preenchido."
+                    : "já pode baixar em Word ou PDF."}
                 </p>
               </div>
             </div>
@@ -478,11 +482,13 @@ function Preencher() {
           </Button>
           <Button onClick={exportarWord} disabled={baixando} className="gap-2">
             {baixando ? <Loader2 className="size-4 animate-spin" /> : <FileType2 className="size-4" />}
-            {temOriginal ? "Baixar documento original preenchido" : "Baixar Word"}
+            {temOriginal ? "Baixar documento preenchido" : "Baixar Word"}
           </Button>
-          <Button onClick={exportarPdf} disabled={baixando} variant="outline" className="gap-2">
-            <FileText className="size-4" /> {temOriginal ? "Baixar cópia simples (PDF)" : "Baixar PDF"}
-          </Button>
+          {!temOriginal && (
+            <Button onClick={exportarPdf} disabled={baixando} variant="outline" className="gap-2">
+              <FileText className="size-4" /> Baixar PDF
+            </Button>
+          )}
           <Button
             variant="ghost"
             className="gap-2"
