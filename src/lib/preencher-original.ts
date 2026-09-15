@@ -68,11 +68,31 @@ function desescaparXml(texto: string) {
     .replace(/&amp;/g, "&");
 }
 
-/** Preenche um parágrafo do Word inserindo valores nas lacunas dos rótulos. */
+/** Só espaços, sublinhados, pontos ou tracejados — ou seja, lacuna vazia. */
+function ehLacuna(texto: string) {
+  return texto.trim().length === 0 || /^[_.\-–—…·\u00A0\s]+$/.test(texto);
+}
+
+/**
+ * Onde termina a área que pertence ao campo: no começo do próximo rótulo
+ * conhecido, ou no fim do trecho analisado.
+ */
+function fimDaArea(plano: string, inicio: number, limites: RegExp[]) {
+  const resto = plano.slice(inicio);
+  let fim = resto.length;
+  for (const rx of limites) {
+    const achado = rx.exec(resto);
+    if (achado && achado.index > 0 && achado.index < fim) fim = achado.index;
+  }
+  return inicio + fim;
+}
+
+/** Preenche um parágrafo do Word substituindo o conteúdo antigo do campo. */
 function preencherParagrafo(
   paragrafo: string,
   pendentes: { campo: Campo; valor: string }[],
   usados: Set<string>,
+  limites: Map<string, RegExp[]>,
 ): string {
   const segmentos: Segmento[] = [];
   let texto = "";
@@ -110,16 +130,26 @@ function preencherParagrafo(
     const pulo = /^\s*[:：]?\s*/.exec(depois);
     pos += pulo?.[0]?.length ?? 0;
 
-    const lacuna = /^[_.…\u00A0\s]{2,}/.exec(texto.slice(pos));
-    if (lacuna && lacuna[0].replace(/\s/g, "").length >= 2) {
-      const tam = lacuna[0].length;
-      const resto = tam > valor.length + 1 ? "_".repeat(tam - valor.length - 1) : "";
-      edicoes.push({ ini: pos, fim: pos + tam, texto: `${valor} ${resto}` });
+    // a área do campo vai até o próximo rótulo conhecido (ou fim do parágrafo)
+    let fim = fimDaArea(plano, pos, limites.get(campo.chave) ?? []);
+    const area = texto.slice(pos, fim);
+    const areaVazia = ehLacuna(area);
+
+    if (!areaVazia && area.length > 80) {
+      // rótulo citado no meio de um texto corrido: não apagamos o parágrafo
+      const lacuna = /^[_.…·\u00A0\s]{2,}/.exec(area);
+      if (lacuna) fim = pos + lacuna[0].length;
+      else fim = pos;
     } else {
-      edicoes.push({ ini: pos, fim: pos, texto: `${valor} ` });
+      // preserva o espaçamento final da área (pontuação/linha seguinte)
+      const cauda = /\s+$/.exec(area);
+      if (cauda && fim - cauda[0].length > pos) fim -= cauda[0].length;
     }
+
+    edicoes.push({ ini: pos, fim, texto: valor });
     usados.add(campo.chave);
   }
+
 
   if (edicoes.length === 0) return paragrafo;
   edicoes.sort((a, b) => b.ini - a.ini);
