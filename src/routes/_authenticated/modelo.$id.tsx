@@ -479,11 +479,13 @@ function Preencher() {
           </Button>
           <Button onClick={exportarWord} disabled={baixando} className="gap-2">
             {baixando ? <Loader2 className="size-4 animate-spin" /> : <FileType2 className="size-4" />}
-            {temOriginal ? "Baixar documento original preenchido" : "Baixar Word"}
+            {temOriginal ? "Baixar documento preenchido" : "Baixar Word"}
           </Button>
-          <Button onClick={exportarPdf} disabled={baixando} variant="outline" className="gap-2">
-            <FileText className="size-4" /> {temOriginal ? "Baixar cópia simples (PDF)" : "Baixar PDF"}
-          </Button>
+          {!temOriginal && (
+            <Button onClick={exportarPdf} disabled={baixando} variant="outline" className="gap-2">
+              <FileText className="size-4" /> Baixar PDF
+            </Button>
+          )}
           <Button
             variant="ghost"
             className="gap-2"
