@@ -199,6 +199,7 @@ async function preencherDocx(
   const zip = await JSZip.loadAsync(bytes);
   const pendentes = camposComValor(estrutura, valores);
   const usados = new Set<string>();
+  const limites = limitesDeCampos(estrutura);
 
   const partes = Object.keys(zip.files).filter((n) =>
     /^word\/(document\d*|header\d*|footer\d*)\.xml$/.test(n),
@@ -209,8 +210,9 @@ async function preencherDocx(
     if (!arquivo) continue;
     const xml = await arquivo.async("string");
     const novo = xml.replace(/<w:p(?:\s[^>]*)?>[\s\S]*?<\/w:p>/g, (par) =>
-      preencherParagrafo(par, pendentes, usados),
+      preencherParagrafo(par, pendentes, usados, limites),
     );
+
     zip.file(nome, novo);
   }
 
