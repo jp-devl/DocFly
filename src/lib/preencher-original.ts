@@ -47,6 +47,21 @@ function camposComValor(estrutura: Estrutura, valores: Valores) {
     .sort((a, b) => b.campo.rotulo.length - a.campo.rotulo.length);
 }
 
+/** Para cada campo, os rótulos dos outros campos — usados como fronteira. */
+function limitesDeCampos(estrutura: Estrutura) {
+  const campos = todosOsCampos(estrutura);
+  const mapa = new Map<string, RegExp[]>();
+  for (const campo of campos) {
+    const outros = campos
+      .filter((c) => c.chave !== campo.chave)
+      .map((c) => regexRotulo(c.rotulo))
+      .filter((rx): rx is RegExp => rx !== null);
+    mapa.set(campo.chave, outros);
+  }
+  return mapa;
+}
+
+
 /* ------------------------------- WORD (.docx) ------------------------------ */
 
 type Segmento = { xmlIni: number; xmlFim: number; ini: number; fim: number };
@@ -68,11 +83,31 @@ function desescaparXml(texto: string) {
     .replace(/&amp;/g, "&");
 }
 
-/** Preenche um parágrafo do Word inserindo valores nas lacunas dos rótulos. */
+/** Só espaços, sublinhados, pontos ou tracejados — ou seja, lacuna vazia. */
+function ehLacuna(texto: string) {
+  return texto.trim().length === 0 || /^[_.\-–—…·\u00A0\s]+$/.test(texto);
+}
+
+/**
+ * Onde termina a área que pertence ao campo: no começo do próximo rótulo
+ * conhecido, ou no fim do trecho analisado.
+ */
+function fimDaArea(plano: string, inicio: number, limites: RegExp[]) {
+  const resto = plano.slice(inicio);
+  let fim = resto.length;
+  for (const rx of limites) {
+    const achado = rx.exec(resto);
+    if (achado && achado.index > 0 && achado.index < fim) fim = achado.index;
+  }
+  return inicio + fim;
+}
+
+/** Preenche um parágrafo do Word substituindo o conteúdo antigo do campo. */
 function preencherParagrafo(
   paragrafo: string,
   pendentes: { campo: Campo; valor: string }[],
   usados: Set<string>,
+  limites: Map<string, RegExp[]>,
 ): string {
   const segmentos: Segmento[] = [];
   let texto = "";
@@ -110,16 +145,26 @@ function preencherParagrafo(
     const pulo = /^\s*[:：]?\s*/.exec(depois);
     pos += pulo?.[0]?.length ?? 0;
 
-    const lacuna = /^[_.…\u00A0\s]{2,}/.exec(texto.slice(pos));
-    if (lacuna && lacuna[0].replace(/\s/g, "").length >= 2) {
-      const tam = lacuna[0].length;
-      const resto = tam > valor.length + 1 ? "_".repeat(tam - valor.length - 1) : "";
-      edicoes.push({ ini: pos, fim: pos + tam, texto: `${valor} ${resto}` });
+    // a área do campo vai até o próximo rótulo conhecido (ou fim do parágrafo)
+    let fim = fimDaArea(plano, pos, limites.get(campo.chave) ?? []);
+    const area = texto.slice(pos, fim);
+    const areaVazia = ehLacuna(area);
+
+    if (!areaVazia && area.length > 80) {
+      // rótulo citado no meio de um texto corrido: não apagamos o parágrafo
+      const lacuna = /^[_.…·\u00A0\s]{2,}/.exec(area);
+      if (lacuna) fim = pos + lacuna[0].length;
+      else fim = pos;
     } else {
-      edicoes.push({ ini: pos, fim: pos, texto: `${valor} ` });
+      // preserva o espaçamento final da área (pontuação/linha seguinte)
+      const cauda = /\s+$/.exec(area);
+      if (cauda && fim - cauda[0].length > pos) fim -= cauda[0].length;
     }
+
+    edicoes.push({ ini: pos, fim, texto: valor });
     usados.add(campo.chave);
   }
+
 
   if (edicoes.length === 0) return paragrafo;
   edicoes.sort((a, b) => b.ini - a.ini);
@@ -169,6 +214,7 @@ async function preencherDocx(
   const zip = await JSZip.loadAsync(bytes);
   const pendentes = camposComValor(estrutura, valores);
   const usados = new Set<string>();
+  const limites = limitesDeCampos(estrutura);
 
   const partes = Object.keys(zip.files).filter((n) =>
     /^word\/(document\d*|header\d*|footer\d*)\.xml$/.test(n),
@@ -179,8 +225,9 @@ async function preencherDocx(
     if (!arquivo) continue;
     const xml = await arquivo.async("string");
     const novo = xml.replace(/<w:p(?:\s[^>]*)?>[\s\S]*?<\/w:p>/g, (par) =>
-      preencherParagrafo(par, pendentes, usados),
+      preencherParagrafo(par, pendentes, usados, limites),
     );
+
     zip.file(nome, novo);
   }
 
@@ -205,56 +252,127 @@ async function preencherPdf(
 
   const pendentes = camposComValor(estrutura, valores);
   const usados = new Set<string>();
+  const limites = limitesDeCampos(estrutura);
 
   const doc = await pdfjs.getDocument({ data: bytes.slice(0) }).promise;
   const saida = await PDFDocument.load(bytes.slice(0));
   const fonte = await saida.embedFont(StandardFonts.Helvetica);
   const paginas = saida.getPages();
 
+  type ItemTexto = { str: string; width: number; height: number; transform: number[] };
+  type Peca = { texto: string; x: number; fimX: number; y: number; alt: number };
+  type Trecho = { ini: number; fim: number; peca: Peca };
+
   for (let p = 1; p <= doc.numPages; p++) {
     const pagina = await doc.getPage(p);
     const conteudo = await pagina.getTextContent();
-    type ItemTexto = { str: string; width: number; height: number; transform: number[] };
-    const itens = (conteudo.items as unknown[]).filter(
-      (i): i is ItemTexto => typeof (i as { str?: unknown }).str === "string",
-    );
-
-    let plano = "";
-    const mapa: { ini: number; fim: number; item: (typeof itens)[number] }[] = [];
-    for (const item of itens) {
-      const ini = plano.length;
-      plano += item.str;
-      mapa.push({ ini, fim: plano.length, item });
-      plano += " ";
-    }
-    const normal = semAcento(plano);
     const alvo = paginas[p - 1];
     if (!alvo) continue;
+    const larguraPagina = alvo.getWidth();
 
-    for (const { campo, valor } of pendentes) {
-      if (usados.has(campo.chave)) continue;
-      const rx = regexRotulo(campo.rotulo);
-      if (!rx) continue;
-      const achado = rx.exec(normal);
-      if (!achado) continue;
-      const fim = achado.index + achado[0].length;
-      const ancora = mapa.find((s) => fim > s.ini && fim <= s.fim) ?? mapa.find((s) => s.ini >= fim);
-      if (!ancora) continue;
-
-      const t = ancora.item.transform;
-      const tamanho = Math.min(12, Math.max(8, Math.abs(t[3] ?? 10) * 0.9));
-      const x = (t[4] ?? 0) + ancora.item.width + 4;
-      const y = t[5] ?? 0;
-      alvo.drawText(valor, {
-        x,
-        y: y + tamanho * 0.1,
-        size: tamanho,
-        font: fonte,
-        color: rgb(0.05, 0.05, 0.05),
+    const pecas: Peca[] = (conteudo.items as unknown[])
+      .filter((i): i is ItemTexto => typeof (i as { str?: unknown }).str === "string")
+      .filter((i) => i.str.length > 0)
+      .map((i) => {
+        const t = i.transform;
+        const x = t[4] ?? 0;
+        const alt = Math.abs(t[3] ?? i.height ?? 10) || 10;
+        return { texto: i.str, x, fimX: x + (i.width ?? 0), y: t[5] ?? 0, alt };
       });
-      usados.add(campo.chave);
+
+    // agrupa as peças por linha (mesma altura base)
+    const linhas: Peca[][] = [];
+    for (const peca of [...pecas].sort((a, b) => b.y - a.y || a.x - b.x)) {
+      const ultima = linhas[linhas.length - 1];
+      const ref = ultima?.[0];
+      if (ultima && ref && Math.abs(ref.y - peca.y) <= Math.max(2, ref.alt * 0.3)) ultima.push(peca);
+      else linhas.push([peca]);
+    }
+
+    for (const linha of linhas) {
+      linha.sort((a, b) => a.x - b.x);
+      let texto = "";
+      const trechos: Trecho[] = [];
+      let anterior: Peca | null = null;
+      for (const peca of linha) {
+        if (anterior && peca.x - anterior.fimX > anterior.alt * 0.2 && !/\s$/.test(texto)) {
+          texto += " ";
+        }
+        const ini = texto.length;
+        texto += peca.texto;
+        trechos.push({ ini, fim: texto.length, peca });
+        anterior = peca;
+      }
+      const normal = semAcento(texto);
+
+      /** Coordenada x de um índice de caractere da linha. */
+      const xDoIndice = (idx: number) => {
+        for (const t of trechos) {
+          if (idx >= t.ini && idx <= t.fim) {
+            const prop = (idx - t.ini) / Math.max(1, t.fim - t.ini);
+            return t.peca.x + (t.peca.fimX - t.peca.x) * prop;
+          }
+        }
+        const ultimo = trechos[trechos.length - 1];
+        return ultimo ? ultimo.peca.fimX : 0;
+      };
+
+      for (const { campo, valor } of pendentes) {
+        if (usados.has(campo.chave)) continue;
+        const rx = regexRotulo(campo.rotulo);
+        if (!rx) continue;
+        const achado = rx.exec(normal);
+        if (!achado) continue;
+
+        let pos = achado.index + achado[0].length;
+        const pulo = /^\s*[:：]?\s*/.exec(texto.slice(pos));
+        pos += pulo?.[0]?.length ?? 0;
+
+        // a área do campo termina no próximo rótulo conhecido, ou no fim da linha
+        const fim = fimDaArea(normal, pos, limites.get(campo.chave) ?? []);
+        const area = texto.slice(pos, fim);
+        if (!ehLacuna(area) && area.length > 80) continue;
+
+        const trechoAncora =
+          trechos.find((t) => pos >= t.ini && pos < t.fim) ?? trechos[trechos.length - 1];
+        if (!trechoAncora) continue;
+        const alt = trechoAncora.peca.alt;
+        const xIni = xDoIndice(pos);
+        const xFimArea = area.trim().length > 0 ? xDoIndice(fim) : xDoIndice(fim);
+        const limiteDireito = Math.min(larguraPagina - 24, Math.max(xFimArea, xIni + alt * 4));
+        const y = trechoAncora.peca.y;
+
+        // apaga o conteúdo antigo da área do campo antes de escrever o novo valor
+        if (area.trim().length > 0 && xFimArea > xIni) {
+          alvo.drawRectangle({
+            x: xIni - 0.5,
+            y: y - alt * 0.28,
+            width: xFimArea - xIni + 1,
+            height: alt * 1.2,
+            color: rgb(1, 1, 1),
+          });
+        }
+
+        // ajusta o tamanho para o valor caber na área, sem invadir o campo seguinte
+        const disponivel = Math.max(24, limiteDireito - xIni);
+        let tamanho = Math.min(12, Math.max(7, alt * 0.92));
+        while (tamanho > 6 && fonte.widthOfTextAtSize(valor, tamanho) > disponivel) {
+          tamanho -= 0.5;
+        }
+
+        alvo.drawText(valor, {
+          x: xIni + 0.5,
+          y,
+          size: tamanho,
+          font: fonte,
+          color: rgb(0.05, 0.05, 0.05),
+          maxWidth: disponivel,
+        });
+        usados.add(campo.chave);
+      }
     }
   }
+
 
   const bytesFinais = await saida.save();
   return {
