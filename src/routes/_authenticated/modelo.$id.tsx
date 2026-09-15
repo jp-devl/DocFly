@@ -321,7 +321,10 @@ function Preencher() {
                   Documento preenchido com sucesso.
                 </p>
                 <p className="mt-0.5 text-xs text-muted-foreground">
-                  {total} de {total} campos preenchidos — já pode baixar em Word ou PDF.
+                  {total} de {total} campos preenchidos —{" "}
+                  {temOriginal
+                    ? "baixe o seu documento original já preenchido."
+                    : "já pode baixar em Word ou PDF."}
                 </p>
               </div>
             </div>
