@@ -47,6 +47,21 @@ function camposComValor(estrutura: Estrutura, valores: Valores) {
     .sort((a, b) => b.campo.rotulo.length - a.campo.rotulo.length);
 }
 
+/** Para cada campo, os rótulos dos outros campos — usados como fronteira. */
+function limitesDeCampos(estrutura: Estrutura) {
+  const campos = todosOsCampos(estrutura);
+  const mapa = new Map<string, RegExp[]>();
+  for (const campo of campos) {
+    const outros = campos
+      .filter((c) => c.chave !== campo.chave)
+      .map((c) => regexRotulo(c.rotulo))
+      .filter((rx): rx is RegExp => rx !== null);
+    mapa.set(campo.chave, outros);
+  }
+  return mapa;
+}
+
+
 /* ------------------------------- WORD (.docx) ------------------------------ */
 
 type Segmento = { xmlIni: number; xmlFim: number; ini: number; fim: number };
