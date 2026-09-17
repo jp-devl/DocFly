@@ -305,12 +305,24 @@ async function preencherPdf(
       }
       const normal = semAcento(texto);
 
-      /** Coordenada x de um índice de caractere da linha. */
+      /**
+       * Coordenada x de um índice de caractere da linha. A largura de cada
+       * letra é estimada com a métrica de uma fonte proporcional e depois
+       * ajustada à largura real da peça — bem mais preciso que dividir igual.
+       */
       const xDoIndice = (idx: number) => {
         for (const t of trechos) {
           if (idx >= t.ini && idx <= t.fim) {
-            const prop = (idx - t.ini) / Math.max(1, t.fim - t.ini);
-            return t.peca.x + (t.peca.fimX - t.peca.x) * prop;
+            const conteudo = texto.slice(t.ini, t.fim);
+            const parcial = texto.slice(t.ini, idx);
+            let prop = (idx - t.ini) / Math.max(1, t.fim - t.ini);
+            try {
+              const total = fonte.widthOfTextAtSize(conteudo, 10);
+              if (total > 0) prop = fonte.widthOfTextAtSize(parcial, 10) / total;
+            } catch {
+              /* caracteres fora da fonte: mantém a divisão simples */
+            }
+            return t.peca.x + (t.peca.fimX - t.peca.x) * Math.min(1, Math.max(0, prop));
           }
         }
         const ultimo = trechos[trechos.length - 1];
