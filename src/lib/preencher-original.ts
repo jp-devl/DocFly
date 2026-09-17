@@ -305,12 +305,24 @@ async function preencherPdf(
       }
       const normal = semAcento(texto);
 
-      /** Coordenada x de um índice de caractere da linha. */
+      /**
+       * Coordenada x de um índice de caractere da linha. A largura de cada
+       * letra é estimada com a métrica de uma fonte proporcional e depois
+       * ajustada à largura real da peça — bem mais preciso que dividir igual.
+       */
       const xDoIndice = (idx: number) => {
         for (const t of trechos) {
           if (idx >= t.ini && idx <= t.fim) {
-            const prop = (idx - t.ini) / Math.max(1, t.fim - t.ini);
-            return t.peca.x + (t.peca.fimX - t.peca.x) * prop;
+            const conteudo = texto.slice(t.ini, t.fim);
+            const parcial = texto.slice(t.ini, idx);
+            let prop = (idx - t.ini) / Math.max(1, t.fim - t.ini);
+            try {
+              const total = fonte.widthOfTextAtSize(conteudo, 10);
+              if (total > 0) prop = fonte.widthOfTextAtSize(parcial, 10) / total;
+            } catch {
+              /* caracteres fora da fonte: mantém a divisão simples */
+            }
+            return t.peca.x + (t.peca.fimX - t.peca.x) * Math.min(1, Math.max(0, prop));
           }
         }
         const ultimo = trechos[trechos.length - 1];
@@ -324,7 +336,8 @@ async function preencherPdf(
         const achado = rx.exec(normal);
         if (!achado) continue;
 
-        let pos = achado.index + achado[0].length;
+        const fimRotulo = achado.index + achado[0].length;
+        let pos = fimRotulo;
         const pulo = /^\s*[:：]?\s*/.exec(texto.slice(pos));
         pos += pulo?.[0]?.length ?? 0;
 
@@ -338,30 +351,47 @@ async function preencherPdf(
         if (!trechoAncora) continue;
         const alt = trechoAncora.peca.alt;
         const xIni = xDoIndice(pos);
-        const xFimArea = area.trim().length > 0 ? xDoIndice(fim) : xDoIndice(fim);
-        const limiteDireito = Math.min(larguraPagina - 24, Math.max(xFimArea, xIni + alt * 4));
+        const xFimArea = xDoIndice(fim);
+        // a estimativa de coordenada por caractere tem folga: apaga um pouco
+        // antes e depois da área, sem invadir o rótulo nem o campo seguinte
+        const folga = alt * 0.55;
+        // o limite esquerdo é logo após o ":" do rótulo, para não apagá-lo
+        const puloTexto = pulo?.[0] ?? "";
+        const idxDoisPontos = puloTexto.search(/[:：]/);
+        const xRotulo =
+          idxDoisPontos >= 0
+            ? xDoIndice(fimRotulo + idxDoisPontos + 1)
+            : xDoIndice(fimRotulo);
+        const xApagaIni = Math.max(xRotulo + 0.5, xIni - folga);
+        const xProximo = fim < texto.length ? xDoIndice(fim) : xFimArea;
+        const xApagaFim = Math.max(
+          xFimArea,
+          Math.min(xFimArea + folga, fim < texto.length ? xProximo : xFimArea + folga),
+        );
+        const limiteDireito = Math.min(larguraPagina - 24, Math.max(xApagaFim, xIni + alt * 4));
         const y = trechoAncora.peca.y;
 
         // apaga o conteúdo antigo da área do campo antes de escrever o novo valor
-        if (area.trim().length > 0 && xFimArea > xIni) {
+        if (area.trim().length > 0 && xApagaFim > xApagaIni) {
           alvo.drawRectangle({
-            x: xIni - 0.5,
-            y: y - alt * 0.28,
-            width: xFimArea - xIni + 1,
-            height: alt * 1.2,
+            x: xApagaIni,
+            y: y - alt * 0.3,
+            width: xApagaFim - xApagaIni,
+            height: alt * 1.25,
             color: rgb(1, 1, 1),
           });
         }
 
         // ajusta o tamanho para o valor caber na área, sem invadir o campo seguinte
-        const disponivel = Math.max(24, limiteDireito - xIni);
+        const xTexto = Math.max(xApagaIni, xIni - folga * 0.6);
+        const disponivel = Math.max(24, limiteDireito - xTexto);
         let tamanho = Math.min(12, Math.max(7, alt * 0.92));
         while (tamanho > 6 && fonte.widthOfTextAtSize(valor, tamanho) > disponivel) {
           tamanho -= 0.5;
         }
 
         alvo.drawText(valor, {
-          x: xIni + 0.5,
+          x: xTexto + 0.5,
           y,
           size: tamanho,
           font: fonte,
