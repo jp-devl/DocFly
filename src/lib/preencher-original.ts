@@ -324,7 +324,8 @@ async function preencherPdf(
         const achado = rx.exec(normal);
         if (!achado) continue;
 
-        let pos = achado.index + achado[0].length;
+        const fimRotulo = achado.index + achado[0].length;
+        let pos = fimRotulo;
         const pulo = /^\s*[:：]?\s*/.exec(texto.slice(pos));
         pos += pulo?.[0]?.length ?? 0;
 
@@ -338,30 +339,41 @@ async function preencherPdf(
         if (!trechoAncora) continue;
         const alt = trechoAncora.peca.alt;
         const xIni = xDoIndice(pos);
-        const xFimArea = area.trim().length > 0 ? xDoIndice(fim) : xDoIndice(fim);
-        const limiteDireito = Math.min(larguraPagina - 24, Math.max(xFimArea, xIni + alt * 4));
+        const xFimArea = xDoIndice(fim);
+        // a estimativa de coordenada por caractere tem folga: apaga um pouco
+        // antes e depois da área, sem invadir o rótulo nem o campo seguinte
+        const folga = alt * 0.55;
+        const xRotulo = xDoIndice(fimRotulo);
+        const xApagaIni = Math.max(xRotulo + 0.5, xIni - folga);
+        const xProximo = fim < texto.length ? xDoIndice(fim) : xFimArea;
+        const xApagaFim = Math.max(
+          xFimArea,
+          Math.min(xFimArea + folga, fim < texto.length ? xProximo : xFimArea + folga),
+        );
+        const limiteDireito = Math.min(larguraPagina - 24, Math.max(xApagaFim, xIni + alt * 4));
         const y = trechoAncora.peca.y;
 
         // apaga o conteúdo antigo da área do campo antes de escrever o novo valor
-        if (area.trim().length > 0 && xFimArea > xIni) {
+        if (area.trim().length > 0 && xApagaFim > xApagaIni) {
           alvo.drawRectangle({
-            x: xIni - 0.5,
-            y: y - alt * 0.28,
-            width: xFimArea - xIni + 1,
-            height: alt * 1.2,
+            x: xApagaIni,
+            y: y - alt * 0.3,
+            width: xApagaFim - xApagaIni,
+            height: alt * 1.25,
             color: rgb(1, 1, 1),
           });
         }
 
         // ajusta o tamanho para o valor caber na área, sem invadir o campo seguinte
-        const disponivel = Math.max(24, limiteDireito - xIni);
+        const xTexto = Math.max(xApagaIni, xIni - folga * 0.6);
+        const disponivel = Math.max(24, limiteDireito - xTexto);
         let tamanho = Math.min(12, Math.max(7, alt * 0.92));
         while (tamanho > 6 && fonte.widthOfTextAtSize(valor, tamanho) > disponivel) {
           tamanho -= 0.5;
         }
 
         alvo.drawText(valor, {
-          x: xIni + 0.5,
+          x: xTexto + 0.5,
           y,
           size: tamanho,
           font: fonte,
