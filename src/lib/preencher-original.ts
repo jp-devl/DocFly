@@ -343,7 +343,13 @@ async function preencherPdf(
         // a estimativa de coordenada por caractere tem folga: apaga um pouco
         // antes e depois da área, sem invadir o rótulo nem o campo seguinte
         const folga = alt * 0.55;
-        const xRotulo = xDoIndice(fimRotulo);
+        // o limite esquerdo é logo após o ":" do rótulo, para não apagá-lo
+        const puloTexto = pulo?.[0] ?? "";
+        const idxDoisPontos = puloTexto.search(/[:：]/);
+        const xRotulo =
+          idxDoisPontos >= 0
+            ? xDoIndice(fimRotulo + idxDoisPontos + 1)
+            : xDoIndice(fimRotulo);
         const xApagaIni = Math.max(xRotulo + 0.5, xIni - folga);
         const xProximo = fim < texto.length ? xDoIndice(fim) : xFimArea;
         const xApagaFim = Math.max(
