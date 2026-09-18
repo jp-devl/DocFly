@@ -146,7 +146,7 @@ function Landing() {
               className="h-9 w-9 rounded-full lg:hidden"
               onClick={() => setMenuAberto((v) => !v)}
             >
-              {menuAberto ? <Menu className="size-4" /> : <Menu className="size-4" />}
+              {menuAberto ? <X className="size-4" /> : <Menu className="size-4" />}
             </Button>
           </div>
         </div>
