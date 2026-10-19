@@ -13,6 +13,7 @@ import {
   FileCheck2,
   CircleCheck,
   CalendarDays,
+  Clock,
 } from "lucide-react";
 import { toast } from "sonner";
 import { Marca } from "@/components/marca";
@@ -55,6 +56,10 @@ type Modelo = {
   nome: string;
   descricao: string | null;
   arquivo_nome: string | null;
+  arquivo_path: string | null;
+  capa_path: string | null;
+  capa_url?: string | null;
+  preenchido_em: string | null;
   estrutura: unknown;
   created_at: string;
 };
@@ -101,6 +106,40 @@ function validarArquivo(file: File): { erro: string; motivo: string } | null {
   return null;
 }
 
+/** Miniatura do documento (primeira página do PDF ou a própria imagem reduzida). */
+async function gerarCapa(file: File): Promise<Blob | null> {
+  try {
+    const ehPdf = /\.pdf$/i.test(file.name) || file.type === "application/pdf";
+    const ehImagem = file.type.startsWith("image/");
+    if (!ehPdf && !ehImagem) return null;
+    const canvas = document.createElement("canvas");
+    if (ehPdf) {
+      const pdfjs = await import("pdfjs-dist");
+      const worker = await import("pdfjs-dist/build/pdf.worker.min.mjs?url");
+      pdfjs.GlobalWorkerOptions.workerSrc = worker.default;
+      const doc = await pdfjs.getDocument({ data: await file.arrayBuffer() }).promise;
+      const pagina = await doc.getPage(1);
+      const base = pagina.getViewport({ scale: 1 });
+      const vp = pagina.getViewport({ scale: Math.min(1, 480 / base.width) });
+      canvas.width = Math.round(vp.width);
+      canvas.height = Math.round(vp.height);
+      const ctx = canvas.getContext("2d");
+      if (!ctx) return null;
+      await pagina.render({ canvasContext: ctx, viewport: vp }).promise;
+    } else {
+      const bmp = await createImageBitmap(file);
+      const escala = Math.min(1, 480 / bmp.width);
+      canvas.width = Math.max(1, Math.round(bmp.width * escala));
+      canvas.height = Math.max(1, Math.round(bmp.height * escala));
+      canvas.getContext("2d")?.drawImage(bmp, 0, 0, canvas.width, canvas.height);
+      bmp.close();
+    }
+    return await new Promise((res) => canvas.toBlob(res, "image/jpeg", 0.75));
+  } catch {
+    return null;
+  }
+}
+
 function Modelos() {
   const navigate = useNavigate();
   const [modelos, setModelos] = useState<Modelo[]>([]);
@@ -115,10 +154,22 @@ function Modelos() {
   async function carregar() {
     const { data, error } = await supabase
       .from("modelos")
-      .select("id, nome, descricao, arquivo_nome, estrutura, created_at")
+      .select(
+        "id, nome, descricao, arquivo_nome, arquivo_path, capa_path, preenchido_em, estrutura, created_at",
+      )
       .order("created_at", { ascending: false });
     if (error) toast.error("Não consegui carregar seus modelos.");
-    setModelos((data as Modelo[] | null) ?? []);
+    const lista = (data as Modelo[] | null) ?? [];
+    const comCapa = await Promise.all(
+      lista.map(async (m) => {
+        if (!m.capa_path) return m;
+        const { data: assinada } = await supabase.storage
+          .from("documentos")
+          .createSignedUrl(m.capa_path, 3600);
+        return { ...m, capa_url: assinada?.signedUrl ?? null };
+      }),
+    );
+    setModelos(comCapa);
     setCarregando(false);
   }
 
@@ -161,8 +212,23 @@ function Modelos() {
       setEtapa("Guardando o arquivo…");
       const path = `${uid}/${crypto.randomUUID()}-${file.name.replace(/[^\w.\-]+/g, "_")}`;
       const up = await supabase.storage.from("documentos").upload(path, file);
+      if (up.error) {
+        throw new Error(
+          "Não consegui guardar o arquivo original. Verifique sua conexão e tente novamente.",
+        );
+      }
 
       setEtapa("Criando o formulário…");
+      let capaPath: string | null = null;
+      const capa = await gerarCapa(file);
+      if (capa) {
+        const capaFull = `${uid}/capa-${crypto.randomUUID()}.jpg`;
+        const upCapa = await supabase.storage
+          .from("documentos")
+          .upload(capaFull, capa, { contentType: "image/jpeg" });
+        if (!upCapa.error) capaPath = capaFull;
+      }
+
       const { data: novo, error } = await supabase
         .from("modelos")
         .insert({
@@ -170,7 +236,8 @@ function Modelos() {
           nome: data.nome ?? file.name,
           descricao: data.descricao ?? null,
           arquivo_nome: file.name,
-          arquivo_path: up.error ? null : path,
+          arquivo_path: path,
+          capa_path: capaPath,
           estrutura: (data.estrutura ?? []) as never,
         })
         .select("id")
