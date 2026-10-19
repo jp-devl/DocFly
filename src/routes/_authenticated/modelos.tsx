@@ -125,7 +125,7 @@ async function gerarCapa(file: File): Promise<Blob | null> {
       canvas.height = Math.round(vp.height);
       const ctx = canvas.getContext("2d");
       if (!ctx) return null;
-      await pagina.render({ canvasContext: ctx, viewport: vp }).promise;
+      await pagina.render({ canvas, canvasContext: ctx, viewport: vp }).promise;
     } else {
       const bmp = await createImageBitmap(file);
       const escala = Math.min(1, 480 / bmp.width);
