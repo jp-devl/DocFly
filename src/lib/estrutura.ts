@@ -1,11 +1,15 @@
 export type TipoCampo = "texto" | "numero" | "data" | "opcao" | "simnao";
 
+export type AreaCampo = { x: number; y: number; w: number; h: number };
+
 export type Campo = {
   chave: string;
   rotulo: string;
   tipo: TipoCampo;
   opcoes?: string[];
   longo?: boolean;
+  /** Posição da lacuna na imagem original, em fração da página (0 a 1). */
+  area?: AreaCampo;
 };
 
 export type Secao = {
@@ -56,12 +60,20 @@ export function normalizarEstrutura(input: unknown): Estrutura {
       const opcoes = Array.isArray(f["opcoes"])
         ? (f["opcoes"] as unknown[]).map((o) => String(o)).filter(Boolean).slice(0, 8)
         : undefined;
+      const areaBruta = f["area"] as Record<string, unknown> | undefined;
+      const nums = ["x", "y", "w", "h"].map((k) => Number(areaBruta?.[k]));
+      const escala = (v: number) => (v > 1.01 ? v / 100 : v);
+      const area =
+        nums.length === 4 && nums.every((n) => Number.isFinite(n) && n >= 0)
+          ? { x: escala(nums[0]!), y: escala(nums[1]!), w: escala(nums[2]!), h: escala(nums[3]!) }
+          : undefined;
       campos.push({
         chave,
         rotulo: rotulo.slice(0, 120),
         tipo: tipo === "opcao" && (!opcoes || opcoes.length < 2) ? "texto" : tipo,
         ...(opcoes && opcoes.length >= 2 ? { opcoes } : {}),
         ...(f["longo"] === true ? { longo: true } : {}),
+        ...(area && area.w > 0 && area.w <= 1 && area.h > 0 && area.h <= 1 ? { area } : {}),
       });
     });
 

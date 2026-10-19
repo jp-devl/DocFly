@@ -94,13 +94,22 @@ Regras de fidelidade (obrigatórias):
 - Pode criar quantas seções o documento tiver (até 30). Prefira seguir exatamente as divisões do documento original.
 - Não invente campos que não existem. Não escreva nada fora do JSON.`;
 
+/** Em fotos do documento, a IA também informa onde fica cada lacuna (fração 0–1). */
+const INSTRUCAO_AREA =
+  '\n\nEste documento é uma IMAGEM. Para cada campo, inclua também "area": {"x":0,"y":0,"w":0,"h":0} ' +
+  "com a posição da lacuna em PORCENTAGEM da imagem (0 a 100), sendo x a distância da borda esquerda, " +
+  "y do topo, e w/h a largura e altura da área inteira onde o valor deve ser escrito (a lacuna completa, " +
+  "não só o rótulo). Sem posição exata, omita \"area\".";
+
 export async function gerarEstruturaDoDocumento(
   conteudo: ConteudoDocumento,
   nomeArquivo: string,
   apiKey: string,
 ): Promise<unknown> {
+  const pedeArea =
+    conteudo.tipo === "arquivo" && conteudo.mime.startsWith("image/") ? INSTRUCAO_AREA : "";
   const partes: unknown[] = [
-    { type: "text", text: `Documento: ${nomeArquivo}\n\n${INSTRUCAO}` },
+    { type: "text", text: `Documento: ${nomeArquivo}\n\n${INSTRUCAO}${pedeArea}` },
   ];
 
   if (conteudo.tipo === "texto") {
