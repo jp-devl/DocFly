@@ -413,9 +413,81 @@ async function preencherPdf(
 
 /* --------------------------------- público -------------------------------- */
 
+/* --------------------------------- IMAGEM ---------------------------------- */
+
+/**
+ * Foto/scan do documento: a imagem original vira o fundo integral de uma
+ * página PDF e os valores são escritos apenas dentro das áreas das lacunas
+ * (coordenadas aproximadas identificadas na leitura). Nada do documento é
+ * recriado — o visual vem da própria imagem.
+ */
+async function preencherImagem(
+  bytes: ArrayBuffer,
+  estrutura: Estrutura,
+  valores: Valores,
+): Promise<{ blob: Blob; usados: Set<string> }> {
+  const { PDFDocument, StandardFonts, rgb } = await import("pdf-lib");
+
+  let bmp: ImageBitmap;
+  try {
+    bmp = await createImageBitmap(new Blob([bytes]));
+  } catch {
+    throw new Error("Não consegui abrir essa imagem. Envie em JPG, PNG ou WebP.");
+  }
+
+  const canvas = document.createElement("canvas");
+  canvas.width = bmp.width;
+  canvas.height = bmp.height;
+  const ctx = canvas.getContext("2d");
+  if (!ctx) throw new Error("Não consegui processar essa imagem.");
+  ctx.drawImage(bmp, 0, 0);
+  const png = await new Promise<Blob | null>((res) => canvas.toBlob(res, "image/png"));
+  bmp.close();
+  if (!png) throw new Error("Não consegui processar essa imagem.");
+
+  const doc = await PDFDocument.create();
+  const pagina = doc.addPage([bmp.width, bmp.height]);
+  const img = await doc.embedPng(await png.arrayBuffer());
+  pagina.drawImage(img, { x: 0, y: 0, width: bmp.width, height: bmp.height });
+  const fonte = await doc.embedFont(StandardFonts.Helvetica);
+  const W = bmp.width;
+  const H = bmp.height;
+
+  const usados = new Set<string>();
+  for (const campo of todosOsCampos(estrutura)) {
+    const valor = (valores[campo.chave] ?? "").trim();
+    if (!valor || !campo.area) continue;
+    const { x, y, w, h } = campo.area;
+    const px = x * W;
+    const pw = w * W;
+    const ph = h * H;
+    const py = H - (y + h) * H; // PDF tem origem no rodapé
+    pagina.drawRectangle({ x: px, y: py, width: pw, height: ph, color: rgb(1, 1, 1) });
+    let tamanho = Math.min(14, Math.max(6, ph * 0.72));
+    while (tamanho > 5 && fonte.widthOfTextAtSize(valor, tamanho) > pw * 0.94) tamanho -= 0.5;
+    pagina.drawText(valor, {
+      x: px + pw * 0.03,
+      y: py + Math.max(ph * 0.18, (ph - tamanho) / 2),
+      size: tamanho,
+      font: fonte,
+      color: rgb(0.05, 0.05, 0.05),
+      maxWidth: pw * 0.94,
+    });
+    usados.add(campo.chave);
+  }
+
+  const bytesFinais = await doc.save();
+  return {
+    blob: new Blob([bytesFinais as unknown as BlobPart], { type: "application/pdf" }),
+    usados,
+  };
+}
+
+/* --------------------------------- público -------------------------------- */
+
 export function podePreencherOriginal(nomeArquivo: string | null | undefined) {
   if (!nomeArquivo) return false;
-  return /\.(docx|pdf)$/i.test(nomeArquivo);
+  return /\.(docx|pdf|jpe?g|png|webp|gif|bmp)$/i.test(nomeArquivo);
 }
 
 export async function preencherArquivoOriginal(
@@ -425,21 +497,25 @@ export async function preencherArquivoOriginal(
   valores: Valores,
 ): Promise<ResultadoPreenchimento> {
   const bytes = await original.arrayBuffer();
+  const ehImagem = /\.(jpe?g|png|webp|gif|bmp)$/i.test(nomeArquivo);
   const ehPdf = /\.pdf$/i.test(nomeArquivo);
-  const { blob, usados } = ehPdf
-    ? await preencherPdf(bytes, estrutura, valores)
-    : await preencherDocx(bytes, estrutura, valores);
+  const saidaPdf = ehImagem || ehPdf;
+  const { blob, usados } = ehImagem
+    ? await preencherImagem(bytes, estrutura, valores)
+    : ehPdf
+      ? await preencherPdf(bytes, estrutura, valores)
+      : await preencherDocx(bytes, estrutura, valores);
 
   const preenchiveis = camposComValor(estrutura, valores);
   const faltando = preenchiveis
     .filter((x) => !usados.has(x.campo.chave))
     .map((x) => x.campo.rotulo);
 
-  const base = nomeArquivo.replace(/\.(docx|pdf)$/i, "");
+  const base = nomeArquivo.replace(/\.(docx|pdf|jpe?g|png|webp|gif|bmp)$/i, "");
   return {
     blob,
-    arquivo: `${base}-preenchido.${ehPdf ? "pdf" : "docx"}`,
-    mime: ehPdf
+    arquivo: `${base}-preenchido.${saidaPdf ? "pdf" : "docx"}`,
+    mime: saidaPdf
       ? "application/pdf"
       : "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
     preenchidos: usados.size,
