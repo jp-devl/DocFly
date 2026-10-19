@@ -56,33 +56,39 @@ export type Database = {
         Row: {
           arquivo_nome: string | null
           arquivo_path: string | null
+          capa_path: string | null
           created_at: string
           descricao: string | null
           estrutura: Json
           id: string
           nome: string
+          preenchido_em: string | null
           updated_at: string
           user_id: string
         }
         Insert: {
           arquivo_nome?: string | null
           arquivo_path?: string | null
+          capa_path?: string | null
           created_at?: string
           descricao?: string | null
           estrutura?: Json
           id?: string
           nome: string
+          preenchido_em?: string | null
           updated_at?: string
           user_id: string
         }
         Update: {
           arquivo_nome?: string | null
           arquivo_path?: string | null
+          capa_path?: string | null
           created_at?: string
           descricao?: string | null
           estrutura?: Json
           id?: string
           nome?: string
+          preenchido_em?: string | null
           updated_at?: string
           user_id?: string
         }
