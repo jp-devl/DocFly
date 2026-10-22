@@ -435,9 +435,14 @@ async function preencherImagem(
     throw new Error("Não consegui abrir essa imagem. Envie em JPG, PNG ou WebP.");
   }
 
+  // close() zera as dimensões do bitmap: guardamos o tamanho antes de liberá-lo
+  const W = bmp.width;
+  const H = bmp.height;
+  if (!W || !H) throw new Error("Não consegui ler o tamanho dessa imagem.");
+
   const canvas = document.createElement("canvas");
-  canvas.width = bmp.width;
-  canvas.height = bmp.height;
+  canvas.width = W;
+  canvas.height = H;
   const ctx = canvas.getContext("2d");
   if (!ctx) throw new Error("Não consegui processar essa imagem.");
   ctx.drawImage(bmp, 0, 0);
@@ -446,14 +451,29 @@ async function preencherImagem(
   if (!png) throw new Error("Não consegui processar essa imagem.");
 
   const doc = await PDFDocument.create();
-  const pagina = doc.addPage([bmp.width, bmp.height]);
+  const pagina = doc.addPage([W, H]);
   const img = await doc.embedPng(await png.arrayBuffer());
-  pagina.drawImage(img, { x: 0, y: 0, width: bmp.width, height: bmp.height });
+  pagina.drawImage(img, { x: 0, y: 0, width: W, height: H });
   const fonte = await doc.embedFont(StandardFonts.Helvetica);
-  const W = bmp.width;
-  const H = bmp.height;
 
   const usados = new Set<string>();
+  const contexto = ctx;
+  /** A área já tem algo escrito? Só nesse caso ela é coberta antes de escrever. */
+  function temConteudoAntigo(x: number, yTop: number, w: number, h: number) {
+    const xi = Math.max(0, Math.round(x));
+    const yi = Math.max(0, Math.round(yTop));
+    const wi = Math.min(canvas.width - xi, Math.max(1, Math.round(w)));
+    const hi = Math.min(canvas.height - yi, Math.max(1, Math.round(h)));
+    if (wi <= 0 || hi <= 0) return false;
+    const dados = contexto.getImageData(xi, yi, wi, hi).data;
+    let escuro = 0;
+    for (let i = 0; i < dados.length; i += 4) {
+      const lum = 0.299 * dados[i]! + 0.587 * dados[i + 1]! + 0.114 * dados[i + 2]!;
+      if (lum < 170) escuro++;
+    }
+    return escuro / (wi * hi) > 0.12;
+  }
+
   for (const campo of todosOsCampos(estrutura)) {
     const valor = (valores[campo.chave] ?? "").trim();
     if (!valor || !campo.area) continue;
@@ -462,7 +482,11 @@ async function preencherImagem(
     const pw = w * W;
     const ph = h * H;
     const py = H - (y + h) * H; // PDF tem origem no rodapé
-    pagina.drawRectangle({ x: px, y: py, width: pw, height: ph, color: rgb(1, 1, 1) });
+    // a linha ou caixa impressa do documento permanece visível: só cobrimos a
+    // área quando ela já contém conteúdo escrito (formulário pré-preenchido)
+    if (temConteudoAntigo(px, y * H, pw, ph)) {
+      pagina.drawRectangle({ x: px, y: py, width: pw, height: ph, color: rgb(1, 1, 1) });
+    }
     let tamanho = Math.min(14, Math.max(6, ph * 0.72));
     while (tamanho > 5 && fonte.widthOfTextAtSize(valor, tamanho) > pw * 0.94) tamanho -= 0.5;
     pagina.drawText(valor, {

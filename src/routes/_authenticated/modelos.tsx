@@ -125,7 +125,7 @@ async function gerarCapa(file: File): Promise<Blob | null> {
       canvas.height = Math.round(vp.height);
       const ctx = canvas.getContext("2d");
       if (!ctx) return null;
-      await pagina.render({ canvas, canvasContext: ctx, viewport: vp }).promise;
+      await pagina.render({ canvas, viewport: vp }).promise;
     } else {
       const bmp = await createImageBitmap(file);
       const escala = Math.min(1, 480 / bmp.width);
@@ -478,9 +478,18 @@ function Modelos() {
                        className="animate-fade-in group relative flex items-center gap-3 overflow-hidden rounded-2xl border border-border/70 bg-card p-4 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-primary/25 hover:shadow-md active:translate-y-0 active:scale-[0.995]"
                     >
                        <span className="absolute inset-y-3 left-0 w-0.5 rounded-r-full bg-primary/70 opacity-0 transition-opacity group-hover:opacity-100" />
-                       <div className="grid size-11 shrink-0 place-items-center rounded-xl border border-primary/10 bg-primary/5 text-primary transition-transform duration-200 group-hover:scale-105">
-                        <FileText className="size-5" />
-                      </div>
+                      {m.capa_url ? (
+                        <img
+                          src={m.capa_url}
+                          alt=""
+                          aria-hidden="true"
+                          className="size-11 shrink-0 rounded-xl border border-border/70 bg-muted object-cover object-top shadow-sm transition-transform duration-200 group-hover:scale-105"
+                        />
+                      ) : (
+                        <div className="grid size-11 shrink-0 place-items-center rounded-xl border border-primary/10 bg-primary/5 text-primary transition-transform duration-200 group-hover:scale-105">
+                          <FileText className="size-5" />
+                        </div>
+                      )}
                       <Link to="/modelo/$id" params={{ id: m.id }} className="min-w-0 flex-1">
                         <p className="truncate font-semibold text-foreground">{m.nome}</p>
                          <div className="mt-1.5 flex flex-wrap items-center gap-x-2.5 gap-y-1 text-[11px] text-muted-foreground">
@@ -490,6 +499,16 @@ function Modelos() {
                            <span className="inline-flex items-center gap-1"><CalendarDays className="size-3" />{data}</span>
                           {campos > 0 ? <span>· {campos} campos</span> : null}
                            <span className="inline-flex items-center gap-1 font-medium text-foreground/70"><CircleCheck className="size-3 text-primary" />Pronto</span>
+                          {m.preenchido_em ? (
+                            <span className="inline-flex items-center gap-1">
+                              <Clock className="size-3" />
+                              Último preenchimento:{" "}
+                              {new Date(m.preenchido_em).toLocaleDateString("pt-BR", {
+                                day: "2-digit",
+                                month: "short",
+                              })}
+                            </span>
+                          ) : null}
                         </div>
                       </Link>
                       <Button
