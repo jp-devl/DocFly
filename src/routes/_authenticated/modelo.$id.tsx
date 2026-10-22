@@ -156,6 +156,18 @@ function Preencher() {
     }
   }
 
+  /** Registra quando este modelo foi preenchido por último (informativo). */
+  async function marcarAtividade() {
+    try {
+      await supabase
+        .from("modelos")
+        .update({ preenchido_em: new Date().toISOString() })
+        .eq("id", id);
+    } catch {
+      /* se falhar, a última atividade apenas não é atualizada */
+    }
+  }
+
   async function salvar() {
     setSalvando(true);
     const { data: userData } = await supabase.auth.getUser();
@@ -177,6 +189,7 @@ function Preencher() {
       toast.error("Não consegui salvar a ficha.");
       return;
     }
+    await marcarAtividade();
     setSucesso("Ficha salva na sua conta.");
   }
 
@@ -197,6 +210,7 @@ function Preencher() {
         valores,
       );
       await baixarBlob(r.blob, r.arquivo, r.mime);
+      await marcarAtividade();
       if (r.faltando.length > 0) {
         toast.warning(`${r.preenchidos} campo(s) preenchidos no documento original.`, {
           description: `Sem lugar exato no arquivo: ${r.faltando.slice(0, 4).join(", ")}${r.faltando.length > 4 ? "…" : ""}`,
