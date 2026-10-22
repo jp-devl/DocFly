@@ -435,9 +435,14 @@ async function preencherImagem(
     throw new Error("Não consegui abrir essa imagem. Envie em JPG, PNG ou WebP.");
   }
 
+  // close() zera as dimensões do bitmap: guardamos o tamanho antes de liberá-lo
+  const W = bmp.width;
+  const H = bmp.height;
+  if (!W || !H) throw new Error("Não consegui ler o tamanho dessa imagem.");
+
   const canvas = document.createElement("canvas");
-  canvas.width = bmp.width;
-  canvas.height = bmp.height;
+  canvas.width = W;
+  canvas.height = H;
   const ctx = canvas.getContext("2d");
   if (!ctx) throw new Error("Não consegui processar essa imagem.");
   ctx.drawImage(bmp, 0, 0);
@@ -446,12 +451,10 @@ async function preencherImagem(
   if (!png) throw new Error("Não consegui processar essa imagem.");
 
   const doc = await PDFDocument.create();
-  const pagina = doc.addPage([bmp.width, bmp.height]);
+  const pagina = doc.addPage([W, H]);
   const img = await doc.embedPng(await png.arrayBuffer());
-  pagina.drawImage(img, { x: 0, y: 0, width: bmp.width, height: bmp.height });
+  pagina.drawImage(img, { x: 0, y: 0, width: W, height: H });
   const fonte = await doc.embedFont(StandardFonts.Helvetica);
-  const W = bmp.width;
-  const H = bmp.height;
 
   const usados = new Set<string>();
   for (const campo of todosOsCampos(estrutura)) {
