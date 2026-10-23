@@ -79,13 +79,13 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Docfly — documentos preenchidos por voz" },
+      { title: "DocFly - documentos preenchidos por voz" },
       {
         name: "description",
         content: "Envie o documento, fale os dados e baixe o arquivo preenchido.",
       },
-      { name: "author", content: "Docfly" },
-      { property: "og:title", content: "Docfly — documentos preenchidos por voz" },
+      { name: "author", content: "DocFly" },
+      { property: "og:title", content: "DocFly - documentos preenchidos por voz" },
       {
         property: "og:description",
         content: "Envie o documento, fale os dados e baixe o arquivo preenchido.",
@@ -116,7 +116,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 
 function RootShell({ children }: { children: ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="pt-BR">
       <head>
         <HeadContent />
       </head>
