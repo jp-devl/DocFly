@@ -339,7 +339,7 @@ async function preencherPdf(
 
         const fimRotulo = achado.index + achado[0].length;
         let pos = fimRotulo;
-        const pulo = /^\s*[:：]?\s*/.exec(texto.slice(pos));
+        const pulo = /^\s*[:：]*\s*/.exec(texto.slice(pos));
         pos += pulo?.[0]?.length ?? 0;
 
         // a área do campo termina no próximo rótulo conhecido, ou no fim da linha
@@ -358,7 +358,7 @@ async function preencherPdf(
         const folga = alt * 0.55;
         // o limite esquerdo é logo após o ":" do rótulo, para não apagá-lo
         const puloTexto = pulo?.[0] ?? "";
-        const idxDoisPontos = puloTexto.search(/[:：]/);
+        const idxDoisPontos = puloTexto.search(/[:：][^:：]*$/);
         const xRotulo =
           idxDoisPontos >= 0
             ? xDoIndice(fimRotulo + idxDoisPontos + 1)
@@ -389,7 +389,9 @@ async function preencherPdf(
 
         // ajusta o tamanho para o valor caber na área, sem invadir o campo seguinte
         const xTexto = ehLinha ? xIni + alt * 0.3 : Math.max(xApagaIni, xIni - folga * 0.6);
-        const fimLinha = ehLinha ? Math.max(xFimArea, limiteDireito) : limiteDireito;
+        const fimLinha = ehLinha
+          ? fim < texto.length ? Math.max(xFimArea, limiteDireito) : larguraPagina - 36
+          : limiteDireito;
         const disponivel = Math.max(24, fimLinha - xTexto);
         let tamanho = Math.min(12, Math.max(7, alt));
         while (tamanho > 5 && fonte.widthOfTextAtSize(valor, tamanho) > disponivel) {
