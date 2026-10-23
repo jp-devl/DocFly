@@ -142,7 +142,7 @@ function preencherParagrafo(
     let pos = achado.index + achado[0].length;
     // pula ":" e espaços logo após o rótulo
     const depois = texto.slice(pos);
-    const pulo = /^\s*[:：]?\s*/.exec(depois);
+    const pulo = /^\s*[:：]*\s*/.exec(depois);
     pos += pulo?.[0]?.length ?? 0;
 
     // a área do campo vai até o próximo rótulo conhecido (ou fim do parágrafo)
@@ -339,7 +339,7 @@ async function preencherPdf(
 
         const fimRotulo = achado.index + achado[0].length;
         let pos = fimRotulo;
-        const pulo = /^\s*[:：]?\s*/.exec(texto.slice(pos));
+        const pulo = /^\s*[:：]*\s*/.exec(texto.slice(pos));
         pos += pulo?.[0]?.length ?? 0;
 
         // a área do campo termina no próximo rótulo conhecido, ou no fim da linha
@@ -358,7 +358,7 @@ async function preencherPdf(
         const folga = alt * 0.55;
         // o limite esquerdo é logo após o ":" do rótulo, para não apagá-lo
         const puloTexto = pulo?.[0] ?? "";
-        const idxDoisPontos = puloTexto.search(/[:：]/);
+        const idxDoisPontos = puloTexto.search(/[:：][^:：]*$/);
         const xRotulo =
           idxDoisPontos >= 0
             ? xDoIndice(fimRotulo + idxDoisPontos + 1)
@@ -372,8 +372,12 @@ async function preencherPdf(
         const limiteDireito = Math.min(larguraPagina - 24, Math.max(xApagaFim, xIni + alt * 4));
         const y = trechoAncora.peca.y;
 
-        // apaga o conteúdo antigo da área do campo antes de escrever o novo valor
-        if (area.trim().length > 0 && xApagaFim > xApagaIni) {
+        // lacuna de sublinhados/pontilhados: a linha do modelo fica visível e o
+        // valor é escrito em cima dela, com o mesmo tamanho do rótulo
+        const ehLinha = ehLacuna(area) && area.trim().length > 0;
+
+        // apaga só conteúdo antigo de verdade (texto já escrito no campo)
+        if (!ehLinha && area.trim().length > 0 && xApagaFim > xApagaIni) {
           alvo.drawRectangle({
             x: xApagaIni,
             y: y - alt * 0.3,
@@ -384,20 +388,22 @@ async function preencherPdf(
         }
 
         // ajusta o tamanho para o valor caber na área, sem invadir o campo seguinte
-        const xTexto = Math.max(xApagaIni, xIni - folga * 0.6);
-        const disponivel = Math.max(24, limiteDireito - xTexto);
-        let tamanho = Math.min(12, Math.max(7, alt * 0.92));
-        while (tamanho > 6 && fonte.widthOfTextAtSize(valor, tamanho) > disponivel) {
+        const xTexto = ehLinha ? xIni + alt * 0.3 : Math.max(xApagaIni, xIni - folga * 0.6);
+        const fimLinha = ehLinha
+          ? fim < texto.length ? Math.max(xFimArea, limiteDireito) : larguraPagina - 36
+          : limiteDireito;
+        const disponivel = Math.max(24, fimLinha - xTexto);
+        let tamanho = Math.min(12, Math.max(7, alt));
+        while (tamanho > 5 && fonte.widthOfTextAtSize(valor, tamanho) > disponivel) {
           tamanho -= 0.5;
         }
 
         alvo.drawText(valor, {
           x: xTexto + 0.5,
-          y,
+          y: ehLinha ? y + alt * 0.18 : y,
           size: tamanho,
           font: fonte,
           color: rgb(0.05, 0.05, 0.05),
-          maxWidth: disponivel,
         });
         usados.add(campo.chave);
       }
