@@ -1,26 +1,70 @@
-# Voice Form Builder
+<div align="center">
 
-Eu quero Esse formulário para transformar em aplicativo , porque assim eu quero falar sabe com minha voz e aí as lacunas são preenchidas, sem eu precisar ficar digitando
+<img src="assets/docfly-capa.png" alt="DocFly — seus documentos, mais simples" width="100%" />
 
-This project was built with [Lovable](https://lovable.dev).
+<br />
 
-**Live app**: https://vocal-input-magic.lovable.app
+# DocFly
 
-## Build with Lovable
+**Seus documentos, mais simples.**
 
-Continue developing this project in the [Lovable editor](https://lovable.dev/projects/cee68cca-08bb-45c9-a528-a05042cc66ab).
+Uma aplicação web voltada a facilitar o trabalho com documentos digitais, com uma experiência simples e prática.
 
-- **Ship faster**: describe what you want to build and Lovable handles the code.
-- **Stay in sync**: every change made in Lovable is committed straight to this repository.
-- **Full ownership**: this code is yours. Push to `main` on GitHub and your changes sync back into Lovable, ready for your next prompt.
+</div>
 
-## Development
+---
 
-Prefer working locally? You need Node.js and npm — [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating).
+## Sobre o projeto
 
-```sh
-git clone <this-repository-url>
-cd <repository-name>
-npm i
+O **DocFly** é um projeto web desenvolvido com React e TypeScript, com ferramentas para trabalhar com documentos digitais. A proposta é reunir uma interface intuitiva e recursos úteis para tornar tarefas com arquivos mais simples.
+
+## Tecnologias
+
+- **React** — construção da interface.
+- **TypeScript** — tipagem estática.
+- **Vite** — ambiente de desenvolvimento e build.
+- **TanStack Router / TanStack Start** — navegação e estrutura da aplicação.
+- **Tailwind CSS** — estilos da interface.
+- **Supabase** — serviços de backend e integração de dados.
+
+## Executar localmente
+
+### Pré-requisitos
+
+- Node.js compatível com as dependências do projeto.
+- npm.
+
+### Instalação
+
+```bash
+git clone https://github.com/jp-devl/DocFly.git
+cd DocFly
+npm install
 npm run dev
 ```
+
+O terminal informará o endereço local para abrir a aplicação no navegador.
+
+### Build de produção
+
+```bash
+npm run build
+```
+
+## Configuração de ambiente
+
+Se o projeto utilizar Supabase no ambiente local, configure as variáveis necessárias em um arquivo `.env` local, conforme a configuração da aplicação.
+
+> **Importante:** não envie arquivos `.env` nem credenciais privadas para o GitHub. Mantenha o `.env` ignorado pelo Git e compartilhe apenas nomes de variáveis ou um arquivo de exemplo sem valores secretos, quando necessário.
+
+## Estrutura visual
+
+A capa usada neste README fica em `assets/docfly-capa.png`. O arquivo `assets/docfly-logo-site.png` contém a imagem de referência da marca enviada para alinhar a identidade visual.
+
+---
+
+<div align="center">
+
+Feito com dedicação para simplificar o trabalho com documentos.
+
+</div>
