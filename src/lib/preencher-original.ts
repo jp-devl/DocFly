@@ -245,6 +245,7 @@ async function preencherPdf(
   estrutura: Estrutura,
   valores: Valores,
 ): Promise<{ blob: Blob; usados: Set<string> }> {
+  await import("@/lib/polyfill-pdfjs");
   const pdfjs = await import("pdfjs-dist");
   const worker = await import("pdfjs-dist/build/pdf.worker.min.mjs?url");
   pdfjs.GlobalWorkerOptions.workerSrc = worker.default;
