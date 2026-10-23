@@ -114,7 +114,8 @@ async function gerarCapa(file: File): Promise<Blob | null> {
     if (!ehPdf && !ehImagem) return null;
     const canvas = document.createElement("canvas");
     if (ehPdf) {
-      const pdfjs = await import("pdfjs-dist");
+      await import("@/lib/polyfill-pdfjs");
+  const pdfjs = await import("pdfjs-dist");
       const worker = await import("pdfjs-dist/build/pdf.worker.min.mjs?url");
       pdfjs.GlobalWorkerOptions.workerSrc = worker.default;
       const doc = await pdfjs.getDocument({ data: await file.arrayBuffer() }).promise;
