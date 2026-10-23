@@ -142,7 +142,7 @@ function preencherParagrafo(
     let pos = achado.index + achado[0].length;
     // pula ":" e espaços logo após o rótulo
     const depois = texto.slice(pos);
-    const pulo = /^\s*[:：]?\s*/.exec(depois);
+    const pulo = /^\s*[:：]*\s*/.exec(depois);
     pos += pulo?.[0]?.length ?? 0;
 
     // a área do campo vai até o próximo rótulo conhecido (ou fim do parágrafo)
