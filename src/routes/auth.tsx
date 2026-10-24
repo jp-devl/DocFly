@@ -1,6 +1,16 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Loader2 } from "lucide-react";
+import {
+  ArrowRight,
+  CheckCircle2,
+  Eye,
+  EyeOff,
+  FileText,
+  Loader2,
+  LockKeyhole,
+  Mail,
+  ShieldCheck,
+} from "lucide-react";
 import { toast } from "sonner";
 import { Marca } from "@/components/marca";
 import { Button } from "@/components/ui/button";
@@ -13,13 +23,17 @@ import { mensagemErro } from "@/lib/erros";
 export const Route = createFileRoute("/auth")({
   head: () => ({
     meta: [
-      { title: "Entrar no Docfly" },
+      { title: "Entrar no DocFly" },
       {
         name: "description",
-        content: "Acesse sua conta Docfly para enviar documentos e preencher formulários falando.",
+        content:
+          "Acesse sua conta DocFly para enviar documentos e preencher formulários falando.",
       },
-      { property: "og:title", content: "Entrar no Docfly" },
-      { property: "og:description", content: "Entre com e-mail e senha ou com sua conta Google." },
+      { property: "og:title", content: "Entrar no DocFly" },
+      {
+        property: "og:description",
+        content: "Entre com e-mail e senha ou com sua conta Google.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],
@@ -29,45 +43,64 @@ export const Route = createFileRoute("/auth")({
 
 function AuthPage() {
   const navigate = useNavigate();
+
   const [modo, setModo] = useState<"entrar" | "criar">("entrar");
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
+  const [mostrarSenha, setMostrarSenha] = useState(false);
   const [carregando, setCarregando] = useState(false);
   const [aguardandoEmail, setAguardandoEmail] = useState(false);
 
   useEffect(() => {
-    const { data: sub } = supabase.auth.onAuthStateChange((_e, s) => {
-      if (s) void navigate({ to: "/modelos", replace: true });
+    const { data: sub } = supabase.auth.onAuthStateChange((_evento, sessao) => {
+      if (sessao) {
+        void navigate({ to: "/modelos", replace: true });
+      }
     });
+
     void supabase.auth.getSession().then(({ data }) => {
-      if (data.session) void navigate({ to: "/modelos", replace: true });
+      if (data.session) {
+        void navigate({ to: "/modelos", replace: true });
+      }
     });
+
     return () => sub.subscription.unsubscribe();
   }, [navigate]);
 
-  async function enviar(e: React.FormEvent) {
+  async function enviar(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setCarregando(true);
+
     try {
       if (modo === "criar") {
         const { data, error } = await supabase.auth.signUp({
           email,
           password: senha,
-          options: { emailRedirectTo: window.location.origin },
+          options: {
+            emailRedirectTo: window.location.origin,
+          },
         });
+
         if (error) throw error;
+
         if (data.session) {
-          toast.success("Conta criada! Bem-vindo ao Docfly.");
+          toast.success("Conta criada! Bem-vindo ao DocFly.");
         } else {
           setAguardandoEmail(true);
           toast.success("Confirme seu e-mail para ativar a conta.");
         }
       } else {
-        const { error } = await supabase.auth.signInWithPassword({ email, password: senha });
+        const { error } = await supabase.auth.signInWithPassword({
+          email,
+          password: senha,
+        });
+
         if (error) throw error;
       }
     } catch (err) {
-      toast.error(mensagemErro(err, "Não foi possível continuar. Tente novamente."));
+      toast.error(
+        mensagemErro(err, "Não foi possível continuar. Tente novamente."),
+      );
     } finally {
       setCarregando(false);
     }
@@ -75,101 +108,373 @@ function AuthPage() {
 
   async function entrarComGoogle() {
     setCarregando(true);
-    const result = await lovable.auth.signInWithOAuth("google", {
-      redirect_uri: window.location.origin,
-    });
-    if (result.error) {
+
+    try {
+      const result = await lovable.auth.signInWithOAuth("google", {
+        redirect_uri: window.location.origin,
+      });
+
+      if (result.error) {
+        toast.error(
+          mensagemErro(
+            result.error,
+            "Não foi possível entrar com o Google.",
+          ),
+        );
+        setCarregando(false);
+        return;
+      }
+
+      if (result.redirected) return;
+
+      void navigate({ to: "/modelos", replace: true });
+    } catch (err) {
+      toast.error(
+        mensagemErro(err, "Não foi possível entrar com o Google."),
+      );
       setCarregando(false);
-      toast.error(mensagemErro(result.error, "Não foi possível entrar com o Google."));
-      return;
     }
-    if (result.redirected) return;
-    void navigate({ to: "/modelos", replace: true });
+  }
+
+  function alternarModo() {
+    setAguardandoEmail(false);
+    setModo((atual) => (atual === "entrar" ? "criar" : "entrar"));
   }
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-muted/40 px-5 py-12">
-      <div className="w-full max-w-sm">
-        <Link to="/" className="block text-center">
-          <Marca tamanho="md" />
-        </Link>
+    <main className="relative flex min-h-screen overflow-hidden bg-white">
+      {/* Área de apresentação: visível em telas maiores */}
+      <section className="relative hidden w-1/2 flex-col justify-between overflow-hidden bg-[#fff7f6] px-12 py-10 lg:flex xl:px-20">
+        <div className="absolute -left-32 top-1/4 size-80 rounded-full bg-red-100/70 blur-3xl" />
+        <div className="absolute -bottom-32 right-0 size-96 rounded-full bg-rose-100/70 blur-3xl" />
 
-        <div className="mt-6 rounded-2xl border border-border bg-card p-6 shadow-sm">
-          <h1 className="text-xl font-semibold text-foreground">
-            {modo === "entrar" ? "Entrar na sua conta" : "Criar uma conta"}
-          </h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Seus modelos e fichas ficam salvos e privados.
-          </p>
+        <div className="relative z-10">
+          <Link
+            to="/"
+            aria-label="Voltar para a página inicial do DocFly"
+            className="inline-flex rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+          >
+            <Marca tamanho="lg" />
+          </Link>
+        </div>
 
-          {aguardandoEmail ? (
-            <p className="mt-6 rounded-xl bg-muted p-4 text-sm text-foreground">
-              Enviamos um link de confirmação para <strong>{email}</strong>. Abra o e-mail para
-              ativar a conta e depois volte aqui para entrar.
-            </p>
-          ) : (
-            <form onSubmit={enviar} className="mt-6 space-y-4">
-              <div>
-                <Label htmlFor="email">E-mail</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  autoComplete="email"
-                  required
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="mt-1"
-                />
-              </div>
-              <div>
-                <Label htmlFor="senha">Senha</Label>
-                <Input
-                  id="senha"
-                  type="password"
-                  autoComplete={modo === "criar" ? "new-password" : "current-password"}
-                  required
-                  minLength={6}
-                  value={senha}
-                  onChange={(e) => setSenha(e.target.value)}
-                  className="mt-1"
-                />
-              </div>
-              <Button type="submit" className="w-full gap-2" disabled={carregando}>
-                {carregando && <Loader2 className="size-4 animate-spin" />}
-                {modo === "entrar" ? "Entrar" : "Criar conta"}
-              </Button>
-            </form>
-          )}
-
-          <div className="my-5 flex items-center gap-3">
-            <span className="h-px flex-1 bg-border" />
-            <span className="text-xs text-muted-foreground">ou</span>
-            <span className="h-px flex-1 bg-border" />
+        <div className="relative z-10 mx-auto w-full max-w-lg py-12">
+          <div className="mb-8 inline-flex items-center gap-2 rounded-full border border-red-100 bg-white/80 px-4 py-2 text-sm font-semibold text-primary shadow-sm">
+            <span className="flex size-6 items-center justify-center rounded-full bg-red-50">
+              <FileText className="size-3.5" />
+            </span>
+            Seus documentos, de um jeito mais simples
           </div>
 
-          <Button
-            type="button"
-            variant="outline"
-            className="w-full"
-            disabled={carregando}
-            onClick={entrarComGoogle}
-          >
-            Continuar com Google
-          </Button>
+          <h2 className="max-w-lg text-4xl font-extrabold leading-tight tracking-tight text-foreground xl:text-5xl">
+            Menos trabalho manual.
+            <span className="mt-2 block text-primary">
+              Mais tempo para você.
+            </span>
+          </h2>
 
-          <Button
-            type="button"
-            variant="ghost"
-            className="mt-5 w-full text-muted-foreground"
-            onClick={() => {
-              setAguardandoEmail(false);
-              setModo(modo === "entrar" ? "criar" : "entrar");
-            }}
-          >
-            {modo === "entrar" ? "Não tenho conta ainda" : "Já tenho conta"}
-          </Button>
+          <p className="mt-6 max-w-md text-base leading-7 text-muted-foreground xl:text-lg">
+            Organize seus modelos, preencha documentos com praticidade e
+            mantenha tudo em um só lugar.
+          </p>
+
+          <div className="mt-10 space-y-5">
+            <div className="flex items-center gap-4">
+              <span className="flex size-11 shrink-0 items-center justify-center rounded-2xl border border-red-100 bg-white text-primary shadow-sm">
+                <FileText className="size-5" />
+              </span>
+              <div>
+                <p className="font-semibold text-foreground">
+                  Seus modelos organizados
+                </p>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  Encontre seus documentos com facilidade.
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-4">
+              <span className="flex size-11 shrink-0 items-center justify-center rounded-2xl border border-red-100 bg-white text-primary shadow-sm">
+                <ShieldCheck className="size-5" />
+              </span>
+              <div>
+                <p className="font-semibold text-foreground">
+                  Acesso à sua conta
+                </p>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  Entre com suas credenciais para acessar seus dados.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-12 rounded-2xl border border-red-100/80 bg-white/80 p-5 shadow-sm backdrop-blur-sm">
+            <div className="flex items-start gap-3">
+              <CheckCircle2 className="mt-0.5 size-5 shrink-0 text-primary" />
+              <p className="text-sm leading-6 text-muted-foreground">
+                Uma experiência pensada para tornar o preenchimento e a
+                organização de documentos mais simples.
+              </p>
+            </div>
+          </div>
         </div>
-      </div>
+
+        <p className="relative z-10 text-xs text-muted-foreground">
+          DocFly · 2026
+        </p>
+      </section>
+
+      {/* Área de autenticação */}
+      <section className="relative flex min-h-screen w-full items-center justify-center overflow-hidden px-5 py-10 sm:px-8 lg:w-1/2 lg:px-12">
+        <div className="pointer-events-none absolute -right-28 -top-28 size-72 rounded-full bg-red-50 blur-3xl lg:hidden" />
+        <div className="pointer-events-none absolute -bottom-32 -left-24 size-72 rounded-full bg-rose-50 blur-3xl lg:hidden" />
+
+        <div className="relative z-10 w-full max-w-md">
+          {/* Marca para dispositivos menores */}
+          <div className="mb-9 flex justify-center lg:hidden">
+            <Link
+              to="/"
+              aria-label="Voltar para a página inicial do DocFly"
+              className="rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+            >
+              <Marca tamanho="lg" tagline />
+            </Link>
+          </div>
+
+          <div className="rounded-3xl border border-border/80 bg-white p-6 shadow-[0_20px_70px_-25px_rgba(30,30,30,0.14)] sm:p-9">
+            <div className="mb-8">
+              <div className="mb-5 flex size-12 items-center justify-center rounded-2xl bg-red-50 text-primary ring-1 ring-red-100">
+                {modo === "entrar" ? (
+                  <LockKeyhole className="size-6" />
+                ) : (
+                  <FileText className="size-6" />
+                )}
+              </div>
+
+              <h1 className="text-2xl font-extrabold tracking-tight text-foreground sm:text-3xl">
+                {modo === "entrar"
+                  ? "Boas-vindas de volta!"
+                  : "Crie sua conta"}
+              </h1>
+
+              <p className="mt-2 text-sm leading-6 text-muted-foreground sm:text-base">
+                {modo === "entrar"
+                  ? "Entre para continuar usando o DocFly."
+                  : "Comece a organizar seus documentos com o DocFly."}
+              </p>
+            </div>
+
+            {aguardandoEmail ? (
+              <div
+                role="status"
+                className="rounded-2xl border border-green-200 bg-green-50 p-5"
+              >
+                <div className="flex size-11 items-center justify-center rounded-full bg-white text-green-700 shadow-sm">
+                  <Mail className="size-5" />
+                </div>
+
+                <h2 className="mt-4 font-bold text-green-950">
+                  Confira seu e-mail
+                </h2>
+
+                <p className="mt-2 break-words text-sm leading-6 text-green-900">
+                  Enviamos um link de confirmação para{" "}
+                  <strong>{email}</strong>. Abra a mensagem para ativar sua
+                  conta e depois volte aqui para entrar.
+                </p>
+
+                <Button
+                  type="button"
+                  className="mt-5 w-full"
+                  onClick={() => {
+                    setAguardandoEmail(false);
+                    setModo("entrar");
+                    setSenha("");
+                  }}
+                >
+                  Voltar para o login
+                  <ArrowRight className="size-4" />
+                </Button>
+              </div>
+            ) : (
+              <form onSubmit={enviar} className="space-y-5">
+                <div className="space-y-2">
+                  <Label
+                    htmlFor="email"
+                    className="text-sm font-semibold text-foreground"
+                  >
+                    E-mail
+                  </Label>
+
+                  <div className="group relative">
+                    <Mail className="pointer-events-none absolute left-3.5 top-1/2 size-[18px] -translate-y-1/2 text-muted-foreground transition-colors group-focus-within:text-primary" />
+
+                    <Input
+                      id="email"
+                      type="email"
+                      autoComplete="email"
+                      placeholder="Digite seu e-mail"
+                      required
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      className="h-12 rounded-xl border-border bg-white pl-11 text-sm shadow-none transition-all placeholder:text-muted-foreground/70 focus-visible:border-primary focus-visible:ring-4 focus-visible:ring-red-100"
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label
+                    htmlFor="senha"
+                    className="text-sm font-semibold text-foreground"
+                  >
+                    Senha
+                  </Label>
+
+                  <div className="group relative">
+                    <LockKeyhole className="pointer-events-none absolute left-3.5 top-1/2 size-[18px] -translate-y-1/2 text-muted-foreground transition-colors group-focus-within:text-primary" />
+
+                    <Input
+                      id="senha"
+                      type={mostrarSenha ? "text" : "password"}
+                      autoComplete={
+                        modo === "criar" ? "new-password" : "current-password"
+                      }
+                      placeholder={
+                        modo === "criar"
+                          ? "Crie uma senha com 6 caracteres ou mais"
+                          : "Digite sua senha"
+                      }
+                      required
+                      minLength={6}
+                      value={senha}
+                      onChange={(e) => setSenha(e.target.value)}
+                      className="h-12 rounded-xl border-border bg-white pl-11 pr-12 text-sm shadow-none transition-all placeholder:text-muted-foreground/70 focus-visible:border-primary focus-visible:ring-4 focus-visible:ring-red-100"
+                    />
+
+                    <button
+                      type="button"
+                      aria-label={mostrarSenha ? "Ocultar senha" : "Mostrar senha"}
+                      aria-pressed={mostrarSenha}
+                      onClick={() => setMostrarSenha((visivel) => !visivel)}
+                      className="absolute right-3 top-1/2 flex size-8 -translate-y-1/2 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-red-50 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                    >
+                      {mostrarSenha ? (
+                        <EyeOff className="size-[18px]" />
+                      ) : (
+                        <Eye className="size-[18px]" />
+                      )}
+                    </button>
+                  </div>
+
+                  {modo === "criar" && (
+                    <p className="text-xs leading-5 text-muted-foreground">
+                      Use pelo menos 6 caracteres para sua senha.
+                    </p>
+                  )}
+                </div>
+
+                <Button
+                  type="submit"
+                  disabled={carregando}
+                  className="h-12 w-full rounded-xl text-sm font-bold shadow-lg shadow-red-200/60 transition-all hover:shadow-red-200"
+                >
+                  {carregando ? (
+                    <>
+                      <Loader2 className="size-4 animate-spin" />
+                      Aguarde...
+                    </>
+                  ) : (
+                    <>
+                      {modo === "entrar" ? "Entrar na minha conta" : "Criar minha conta"}
+                      <ArrowRight className="size-4" />
+                    </>
+                  )}
+                </Button>
+              </form>
+            )}
+
+            {!aguardandoEmail && (
+              <>
+                <div className="my-6 flex items-center gap-4">
+                  <span className="h-px flex-1 bg-border" />
+                  <span className="text-xs font-medium text-muted-foreground">
+                    ou continue com
+                  </span>
+                  <span className="h-px flex-1 bg-border" />
+                </div>
+
+
+                <Button
+                  type="button"
+                  variant="outline"
+                  disabled={carregando}
+                  onClick={entrarComGoogle}
+                  className="relative h-12 w-full rounded-xl border border-gray-200 bg-white font-medium text-gray-800 shadow-sm transition-all duration-200 hover:border-red-200 hover:bg-red-50/50 hover:shadow-md"
+                >
+                  {carregando ? (
+                    <Loader2 className="!size-5 animate-spin" />
+                  ) : (
+                    <span className="inline-flex items-center justify-center gap-2.5">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 48 48"
+                        aria-hidden="true"
+                        className="!size-6 shrink-0"
+                      >
+                        <path
+                          fill="#4285F4"
+                          d="M43.6 24.5c0-1.4-.1-2.8-.4-4.1H24v7.8h11a9.4 9.4 0 0 1-4.1 6.2v5.1h6.6c3.9-3.6 6.1-8.9 6.1-15Z"
+                        />
+                        <path
+                          fill="#34A853"
+                          d="M24 44c5.5 0 10.1-1.8 13.5-4.8l-6.6-5.1c-1.8 1.2-4.1 2-6.9 2-5.3 0-9.8-3.6-11.4-8.4H5.8v5.3A20 20 0 0 0 24 44Z"
+                        />
+                        <path
+                          fill="#FBBC05"
+                          d="M12.6 27.7a12 12 0 0 1 0-7.4V15H5.8a20 20 0 0 0 0 18l6.8-5.3Z"
+                        />
+                        <path
+                          fill="#EA4335"
+                          d="M24 12.1c3 0 5.7 1 7.8 3.1l5.8-5.8C34.1 6.1 29.5 4 24 4A20 20 0 0 0 5.8 15l6.8 5.3C14.2 15.7 18.7 12.1 24 12.1Z"
+                        />
+                      </svg>
+
+                      <span>Continuar com Google</span>
+                    </span>
+                  )}
+                </Button>
+
+                <div className="mt-7 text-center">
+                  <p className="text-sm text-muted-foreground">
+                    {modo === "entrar"
+                      ? "Ainda não tem uma conta?"
+                      : "Já possui uma conta?"}
+                  </p>
+
+                  <button
+                    type="button"
+                    onClick={alternarModo}
+                    disabled={carregando}
+                    className="mt-1 inline-flex items-center gap-1 rounded-md px-2 py-1 text-sm font-bold text-primary transition-colors hover:text-red-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary disabled:opacity-50"
+                  >
+                    {modo === "entrar" ? "Criar uma conta grátis" : "Entrar na minha conta"}
+                    <ArrowRight className="size-4" />
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
+
+          <div className="mt-6 flex items-center justify-center gap-2 text-xs text-muted-foreground">
+            <ShieldCheck className="size-4 text-primary" />
+            <span>Seu acesso é protegido pelas suas credenciais.</span>
+          </div>
+
+          <p className="mt-4 text-center text-xs text-muted-foreground">
+            Ao continuar, você acessa os serviços do DocFly.
+          </p>
+        </div>
+      </section>
     </main>
   );
 }
