@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
+﻿import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import {
   ArrowRight,
@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { Marca } from "@/components/marca";
+import { TemaToggle } from "@/components/tema-toggle";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -26,8 +27,7 @@ export const Route = createFileRoute("/auth")({
       { title: "Entrar no DocFly" },
       {
         name: "description",
-        content:
-          "Acesse sua conta DocFly para enviar documentos e preencher formulários falando.",
+        content: "Acesse sua conta DocFly para enviar documentos e preencher formulÃ¡rios falando.",
       },
       { property: "og:title", content: "Entrar no DocFly" },
       {
@@ -98,9 +98,7 @@ function AuthPage() {
         if (error) throw error;
       }
     } catch (err) {
-      toast.error(
-        mensagemErro(err, "Não foi possível continuar. Tente novamente."),
-      );
+      toast.error(mensagemErro(err, "Não foi possÃ­vel continuar. Tente novamente."));
     } finally {
       setCarregando(false);
     }
@@ -115,12 +113,7 @@ function AuthPage() {
       });
 
       if (result.error) {
-        toast.error(
-          mensagemErro(
-            result.error,
-            "Não foi possível entrar com o Google.",
-          ),
-        );
+        toast.error(mensagemErro(result.error, "Não foi possÃ­vel entrar com o Google."));
         setCarregando(false);
         return;
       }
@@ -129,9 +122,7 @@ function AuthPage() {
 
       void navigate({ to: "/modelos", replace: true });
     } catch (err) {
-      toast.error(
-        mensagemErro(err, "Não foi possível entrar com o Google."),
-      );
+      toast.error(mensagemErro(err, "Não foi possÃ­vel entrar com o Google."));
       setCarregando(false);
     }
   }
@@ -142,16 +133,19 @@ function AuthPage() {
   }
 
   return (
-    <main className="relative flex min-h-screen overflow-hidden bg-white">
-      {/* Área de apresentação: visível em telas maiores */}
-      <section className="relative hidden w-1/2 flex-col justify-between overflow-hidden bg-[#fff7f6] px-12 py-10 lg:flex xl:px-20">
+    <main className="relative flex min-h-screen overflow-hidden bg-white text-slate-900 dark:bg-slate-950 dark:text-slate-100">
+      <div className="absolute right-5 top-5 z-30 sm:right-8">
+        <TemaToggle />
+      </div>
+      {/* Ãrea de apresentaÃ§Ã£o: visÃ­vel em telas maiores */}
+      <section className="relative hidden w-1/2 flex-col justify-between overflow-hidden bg-[#fff7f6] dark:bg-slate-900 px-12 py-10 lg:flex xl:px-20">
         <div className="absolute -left-32 top-1/4 size-80 rounded-full bg-red-100/70 blur-3xl" />
         <div className="absolute -bottom-32 right-0 size-96 rounded-full bg-rose-100/70 blur-3xl" />
 
         <div className="relative z-10">
           <Link
             to="/"
-            aria-label="Voltar para a página inicial do DocFly"
+            aria-label="Voltar para a pÃ¡gina inicial do DocFly"
             className="inline-flex rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
           >
             <Marca tamanho="lg" />
@@ -159,8 +153,8 @@ function AuthPage() {
         </div>
 
         <div className="relative z-10 mx-auto w-full max-w-lg py-12">
-          <div className="mb-8 inline-flex items-center gap-2 rounded-full border border-red-100 bg-white/80 px-4 py-2 text-sm font-semibold text-primary shadow-sm">
-            <span className="flex size-6 items-center justify-center rounded-full bg-red-50">
+          <div className="mb-8 inline-flex items-center gap-2 rounded-full border border-red-100 bg-white/80 dark:border-slate-700 dark:bg-slate-800/80 px-4 py-2 text-sm font-semibold text-primary shadow-sm">
+            <span className="flex size-6 items-center justify-center rounded-full bg-red-50 dark:bg-slate-700">
               <FileText className="size-3.5" />
             </span>
             Seus documentos, de um jeito mais simples
@@ -168,25 +162,21 @@ function AuthPage() {
 
           <h2 className="max-w-lg text-4xl font-extrabold leading-tight tracking-tight text-foreground xl:text-5xl">
             Menos trabalho manual.
-            <span className="mt-2 block text-primary">
-              Mais tempo para você.
-            </span>
+            <span className="mt-2 block text-primary">Mais tempo para você.</span>
           </h2>
 
           <p className="mt-6 max-w-md text-base leading-7 text-muted-foreground xl:text-lg">
-            Organize seus modelos, preencha documentos com praticidade e
-            mantenha tudo em um só lugar.
+            Organize seus modelos, preencha documentos com praticidade e mantenha tudo em um só
+            lugar.
           </p>
 
           <div className="mt-10 space-y-5">
             <div className="flex items-center gap-4">
-              <span className="flex size-11 shrink-0 items-center justify-center rounded-2xl border border-red-100 bg-white text-primary shadow-sm">
+              <span className="flex size-11 shrink-0 items-center justify-center rounded-2xl border border-red-100 bg-white text-primary shadow-sm dark:border-slate-700 dark:bg-slate-800">
                 <FileText className="size-5" />
               </span>
               <div>
-                <p className="font-semibold text-foreground">
-                  Seus modelos organizados
-                </p>
+                <p className="font-semibold text-foreground">Seus modelos organizados</p>
                 <p className="mt-1 text-sm text-muted-foreground">
                   Encontre seus documentos com facilidade.
                 </p>
@@ -194,13 +184,11 @@ function AuthPage() {
             </div>
 
             <div className="flex items-center gap-4">
-              <span className="flex size-11 shrink-0 items-center justify-center rounded-2xl border border-red-100 bg-white text-primary shadow-sm">
+              <span className="flex size-11 shrink-0 items-center justify-center rounded-2xl border border-red-100 bg-white text-primary shadow-sm dark:border-slate-700 dark:bg-slate-800">
                 <ShieldCheck className="size-5" />
               </span>
               <div>
-                <p className="font-semibold text-foreground">
-                  Acesso à sua conta
-                </p>
+                <p className="font-semibold text-foreground">Acesso à sua conta</p>
                 <p className="mt-1 text-sm text-muted-foreground">
                   Entre com suas credenciais para acessar seus dados.
                 </p>
@@ -208,42 +196,40 @@ function AuthPage() {
             </div>
           </div>
 
-          <div className="mt-12 rounded-2xl border border-red-100/80 bg-white/80 p-5 shadow-sm backdrop-blur-sm">
+          <div className="mt-12 rounded-2xl border border-red-100/80 bg-white/80 dark:border-slate-700 dark:bg-slate-800/80 p-5 shadow-sm backdrop-blur-sm">
             <div className="flex items-start gap-3">
               <CheckCircle2 className="mt-0.5 size-5 shrink-0 text-primary" />
               <p className="text-sm leading-6 text-muted-foreground">
-                Uma experiência pensada para tornar o preenchimento e a
-                organização de documentos mais simples.
+                Uma experiência pensada para tornar o preenchimento e a organização de documentos
+                mais simples.
               </p>
             </div>
           </div>
         </div>
 
-        <p className="relative z-10 text-xs text-muted-foreground">
-          DocFly · 2026
-        </p>
+        <p className="relative z-10 text-xs text-muted-foreground">DocFly · 2026</p>
       </section>
 
-      {/* Área de autenticação */}
+      {/* Ãrea de autenticaÃ§Ã£o */}
       <section className="relative flex min-h-screen w-full items-center justify-center overflow-hidden px-5 py-10 sm:px-8 lg:w-1/2 lg:px-12">
-        <div className="pointer-events-none absolute -right-28 -top-28 size-72 rounded-full bg-red-50 blur-3xl lg:hidden" />
-        <div className="pointer-events-none absolute -bottom-32 -left-24 size-72 rounded-full bg-rose-50 blur-3xl lg:hidden" />
+        <div className="pointer-events-none absolute -right-28 -top-28 size-72 rounded-full bg-red-50 dark:bg-slate-700 blur-3xl lg:hidden" />
+        <div className="pointer-events-none absolute -bottom-32 -left-24 size-72 rounded-full bg-rose-50 blur-3xl lg:hidden dark:bg-slate-800" />
 
         <div className="relative z-10 w-full max-w-md">
           {/* Marca para dispositivos menores */}
           <div className="mb-9 flex justify-center lg:hidden">
             <Link
               to="/"
-              aria-label="Voltar para a página inicial do DocFly"
+              aria-label="Voltar para a pÃ¡gina inicial do DocFly"
               className="rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
             >
               <Marca tamanho="lg" tagline />
             </Link>
           </div>
 
-          <div className="rounded-3xl border border-border/80 bg-white p-6 shadow-[0_20px_70px_-25px_rgba(30,30,30,0.14)] sm:p-9">
+          <div className="rounded-3xl border border-border/80 bg-white p-6 dark:border-slate-700 dark:bg-slate-900 shadow-[0_20px_70px_-25px_rgba(30,30,30,0.14)] sm:p-9">
             <div className="mb-8">
-              <div className="mb-5 flex size-12 items-center justify-center rounded-2xl bg-red-50 text-primary ring-1 ring-red-100">
+              <div className="mb-5 flex size-12 items-center justify-center rounded-2xl bg-red-50 text-primary ring-1 ring-red-100 dark:bg-slate-800 dark:ring-slate-700">
                 {modo === "entrar" ? (
                   <LockKeyhole className="size-6" />
                 ) : (
@@ -252,9 +238,7 @@ function AuthPage() {
               </div>
 
               <h1 className="text-2xl font-extrabold tracking-tight text-foreground sm:text-3xl">
-                {modo === "entrar"
-                  ? "Boas-vindas de volta!"
-                  : "Crie sua conta"}
+                {modo === "entrar" ? "Boas-vindas de volta!" : "Crie sua conta"}
               </h1>
 
               <p className="mt-2 text-sm leading-6 text-muted-foreground sm:text-base">
@@ -265,22 +249,16 @@ function AuthPage() {
             </div>
 
             {aguardandoEmail ? (
-              <div
-                role="status"
-                className="rounded-2xl border border-green-200 bg-green-50 p-5"
-              >
+              <div role="status" className="rounded-2xl border border-green-200 bg-green-50 p-5">
                 <div className="flex size-11 items-center justify-center rounded-full bg-white text-green-700 shadow-sm">
                   <Mail className="size-5" />
                 </div>
 
-                <h2 className="mt-4 font-bold text-green-950">
-                  Confira seu e-mail
-                </h2>
+                <h2 className="mt-4 font-bold text-green-950">Confira seu e-mail</h2>
 
                 <p className="mt-2 break-words text-sm leading-6 text-green-900">
-                  Enviamos um link de confirmação para{" "}
-                  <strong>{email}</strong>. Abra a mensagem para ativar sua
-                  conta e depois volte aqui para entrar.
+                  Enviamos um link de confirmaÃ§Ã£o para <strong>{email}</strong>. Abra a mensagem
+                  para ativar sua conta e depois volte aqui para entrar.
                 </p>
 
                 <Button
@@ -299,10 +277,7 @@ function AuthPage() {
             ) : (
               <form onSubmit={enviar} className="space-y-5">
                 <div className="space-y-2">
-                  <Label
-                    htmlFor="email"
-                    className="text-sm font-semibold text-foreground"
-                  >
+                  <Label htmlFor="email" className="text-sm font-semibold text-foreground">
                     E-mail
                   </Label>
 
@@ -317,16 +292,13 @@ function AuthPage() {
                       required
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      className="h-12 rounded-xl border-border bg-white pl-11 text-sm shadow-none transition-all placeholder:text-muted-foreground/70 focus-visible:border-primary focus-visible:ring-4 focus-visible:ring-red-100"
+                      className="h-12 rounded-xl border-border bg-white pl-11 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 text-sm shadow-none transition-all placeholder:text-muted-foreground/70 focus-visible:border-primary focus-visible:ring-4 focus-visible:ring-red-100 dark:focus-visible:ring-slate-700"
                     />
                   </div>
                 </div>
 
                 <div className="space-y-2">
-                  <Label
-                    htmlFor="senha"
-                    className="text-sm font-semibold text-foreground"
-                  >
+                  <Label htmlFor="senha" className="text-sm font-semibold text-foreground">
                     Senha
                   </Label>
 
@@ -336,9 +308,7 @@ function AuthPage() {
                     <Input
                       id="senha"
                       type={mostrarSenha ? "text" : "password"}
-                      autoComplete={
-                        modo === "criar" ? "new-password" : "current-password"
-                      }
+                      autoComplete={modo === "criar" ? "new-password" : "current-password"}
                       placeholder={
                         modo === "criar"
                           ? "Crie uma senha com 6 caracteres ou mais"
@@ -348,7 +318,7 @@ function AuthPage() {
                       minLength={6}
                       value={senha}
                       onChange={(e) => setSenha(e.target.value)}
-                      className="h-12 rounded-xl border-border bg-white pl-11 pr-12 text-sm shadow-none transition-all placeholder:text-muted-foreground/70 focus-visible:border-primary focus-visible:ring-4 focus-visible:ring-red-100"
+                      className="h-12 rounded-xl border-border bg-white pl-11 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 pr-12 text-sm shadow-none transition-all placeholder:text-muted-foreground/70 focus-visible:border-primary focus-visible:ring-4 focus-visible:ring-red-100 dark:focus-visible:ring-slate-700"
                     />
 
                     <button
@@ -356,7 +326,7 @@ function AuthPage() {
                       aria-label={mostrarSenha ? "Ocultar senha" : "Mostrar senha"}
                       aria-pressed={mostrarSenha}
                       onClick={() => setMostrarSenha((visivel) => !visivel)}
-                      className="absolute right-3 top-1/2 flex size-8 -translate-y-1/2 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-red-50 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                      className="absolute right-3 top-1/2 flex size-8 -translate-y-1/2 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-red-50 hover:text-primary dark:hover:bg-slate-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
                     >
                       {mostrarSenha ? (
                         <EyeOff className="size-[18px]" />
@@ -397,19 +367,16 @@ function AuthPage() {
               <>
                 <div className="my-6 flex items-center gap-4">
                   <span className="h-px flex-1 bg-border" />
-                  <span className="text-xs font-medium text-muted-foreground">
-                    ou continue com
-                  </span>
+                  <span className="text-xs font-medium text-muted-foreground">ou continue com</span>
                   <span className="h-px flex-1 bg-border" />
                 </div>
-
 
                 <Button
                   type="button"
                   variant="outline"
                   disabled={carregando}
                   onClick={entrarComGoogle}
-                  className="relative h-12 w-full rounded-xl border border-gray-200 bg-white font-medium text-gray-800 shadow-sm transition-all duration-200 hover:border-red-200 hover:bg-red-50/50 hover:shadow-md"
+                  className="relative h-12 w-full rounded-xl border border-gray-200 bg-white font-medium text-gray-800 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 shadow-sm transition-all duration-200 hover:border-red-200 hover:bg-red-50/50 hover:shadow-md dark:hover:border-slate-600 dark:hover:bg-slate-700"
                 >
                   {carregando ? (
                     <Loader2 className="!size-5 animate-spin" />
@@ -446,9 +413,7 @@ function AuthPage() {
 
                 <div className="mt-7 text-center">
                   <p className="text-sm text-muted-foreground">
-                    {modo === "entrar"
-                      ? "Ainda não tem uma conta?"
-                      : "Já possui uma conta?"}
+                    {modo === "entrar" ? "Ainda não tem uma conta?" : "Já possui uma conta?"}
                   </p>
 
                   <button
@@ -457,7 +422,7 @@ function AuthPage() {
                     disabled={carregando}
                     className="mt-1 inline-flex items-center gap-1 rounded-md px-2 py-1 text-sm font-bold text-primary transition-colors hover:text-red-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary disabled:opacity-50"
                   >
-                    {modo === "entrar" ? "Criar uma conta grátis" : "Entrar na minha conta"}
+                    {modo === "entrar" ? "Criar uma conta agora" : "Entrar na minha conta"}
                     <ArrowRight className="size-4" />
                   </button>
                 </div>
@@ -467,7 +432,7 @@ function AuthPage() {
 
           <div className="mt-6 flex items-center justify-center gap-2 text-xs text-muted-foreground">
             <ShieldCheck className="size-4 text-primary" />
-            <span>Seu acesso é protegido pelas suas credenciais.</span>
+            <span>Seu acesso © protegido pelas suas credenciais.</span>
           </div>
 
           <p className="mt-4 text-center text-xs text-muted-foreground">

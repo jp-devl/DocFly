@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
+  <title>DocFly</title>
+  <g>
+    <path d="M13 39h17M9 53h21M13 67h17" fill="none" stroke="#ef2938" stroke-width="5.5" stroke-linecap="round"/>
+    <path d="M43 22 77 17 95 35 93 68Q92 78 82 83L58 94 39 70Z" fill="#17191d"/>
+    <path d="M77 17 80 35Q81 41 88 40L95 35Z" fill="#ef2938"/>
+    <path d="M42 73Q54 93 73 86Q88 81 94 65Q81 82 63 79Q51 78 42 73Z" fill="#ef2938"/>
+    <path d="M40 70Q52 86 70 82" fill="none" stroke="#17191d" stroke-width="2.5" stroke-linecap="round"/>
+  </g>
+</svg>

@@ -86,7 +86,6 @@
   --input: oklch(0.922 0.003 260);
   --ring: oklch(0.56 0.21 27);
 
-
   --chart-1: oklch(0.646 0.222 41.116);
   --chart-2: oklch(0.6 0.118 184.704);
   --chart-3: oklch(0.398 0.07 227.392);
@@ -103,38 +102,48 @@
 }
 
 .dark {
-  --background: oklch(0.129 0.042 264.695);
-  --foreground: oklch(0.984 0.003 247.858);
-  --card: oklch(0.208 0.042 265.755);
-  --card-foreground: oklch(0.984 0.003 247.858);
-  --popover: oklch(0.208 0.042 265.755);
-  --popover-foreground: oklch(0.984 0.003 247.858);
-  --primary: oklch(0.62 0.2 27);
-  --primary-foreground: oklch(0.99 0 0);
-  --secondary: oklch(0.279 0.041 260.031);
-  --secondary-foreground: oklch(0.984 0.003 247.858);
-  --muted: oklch(0.279 0.041 260.031);
-  --muted-foreground: oklch(0.704 0.04 256.788);
-  --accent: oklch(0.279 0.041 260.031);
-  --accent-foreground: oklch(0.984 0.003 247.858);
-  --destructive: oklch(0.704 0.191 22.216);
-  --destructive-foreground: oklch(0.984 0.003 247.858);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.62 0.2 27);
+  --background: #020617;
+  --foreground: #f1f5f9;
+
+  --card: #0f172a;
+  --card-foreground: #f1f5f9;
+
+  --popover: #0f172a;
+  --popover-foreground: #f1f5f9;
+
+  --primary: #f04438;
+  --primary-foreground: #ffffff;
+
+  --secondary: #1e293b;
+  --secondary-foreground: #f1f5f9;
+
+  --muted: #1e293b;
+  --muted-foreground: #94a3b8;
+
+  --accent: #1e293b;
+  --accent-foreground: #f1f5f9;
+
+  --destructive: #f87171;
+  --destructive-foreground: #0f172a;
+
+  --border: #334155;
+  --input: #334155;
+  --ring: #f04438;
+
   --chart-1: oklch(0.488 0.243 264.376);
   --chart-2: oklch(0.696 0.17 162.48);
   --chart-3: oklch(0.769 0.188 70.08);
   --chart-4: oklch(0.627 0.265 303.9);
   --chart-5: oklch(0.645 0.246 16.439);
-  --sidebar: oklch(0.208 0.042 265.755);
-  --sidebar-foreground: oklch(0.984 0.003 247.858);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.984 0.003 247.858);
-  --sidebar-accent: oklch(0.279 0.041 260.031);
-  --sidebar-accent-foreground: oklch(0.984 0.003 247.858);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.551 0.027 264.364);
+
+  --sidebar: #0f172a;
+  --sidebar-foreground: #f1f5f9;
+  --sidebar-primary: #f04438;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #1e293b;
+  --sidebar-accent-foreground: #f1f5f9;
+  --sidebar-border: #334155;
+  --sidebar-ring: #f04438;
 }
 
 @layer base {
@@ -186,8 +195,15 @@
 }
 
 @keyframes terminal-cursor-blink {
-  0%, 45% { opacity: 1; }
-  50%, 100% { opacity: 0; }
+  0%,
+  45% {
+    opacity: 1;
+  }
+
+  50%,
+  100% {
+    opacity: 0;
+  }
 }
 
 .terminal-cursor {
@@ -195,8 +211,13 @@
 }
 
 @keyframes terminal-progress-slide {
-  0% { transform: translateX(-110%); }
-  100% { transform: translateX(320%); }
+  0% {
+    transform: translateX(-110%);
+  }
+
+  100% {
+    transform: translateX(320%);
+  }
 }
 
 .terminal-progress {
@@ -204,17 +225,21 @@
 }
 
 @keyframes terminal-scan-move {
-  0% { background-position: 0 -100%; }
-  100% { background-position: 0 100%; }
+  0% {
+    background-position: 0 -100%;
+  }
+
+  100% {
+    background-position: 0 100%;
+  }
 }
 
 .terminal-scan {
-  background-image:
-    repeating-linear-gradient(
-      to bottom,
-      color-mix(in oklab, var(--terminal-accent) 7%, transparent) 0 1px,
-      transparent 1px 4px
-    );
+  background-image: repeating-linear-gradient(
+    to bottom,
+    color-mix(in oklab, var(--terminal-accent) 7%, transparent) 0 1px,
+    transparent 1px 4px
+  );
   animation: terminal-scan-move 6s linear infinite;
   opacity: 0.5;
 }
@@ -222,7 +247,9 @@
 @media (prefers-reduced-motion: reduce) {
   .terminal-cursor,
   .terminal-progress,
-  .terminal-scan { animation: none; }
+  .terminal-scan {
+    animation: none;
+  }
 }
 
 /* --- Transições e efeitos --- */
@@ -248,8 +275,15 @@ button {
 }
 
 @keyframes fade-in {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .animate-fade-in {
@@ -257,25 +291,45 @@ button {
 }
 
 @keyframes scale-in {
-  0% { transform: scale(0.85); opacity: 0; }
-  60% { transform: scale(1.05); opacity: 1; }
-  100% { transform: scale(1); opacity: 1; }
+  0% {
+    transform: scale(0.85);
+    opacity: 0;
+  }
+
+  60% {
+    transform: scale(1.05);
+    opacity: 1;
+  }
+
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
 }
 
 .animate-scale-in {
   animation: scale-in 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
-
-
 @keyframes float-soft {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-4px); }
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-4px);
+  }
 }
 
 @keyframes skeleton-shimmer {
-  0% { transform: translateX(-110%); }
-  100% { transform: translateX(110%); }
+  0% {
+    transform: translateX(-110%);
+  }
+
+  100% {
+    transform: translateX(110%);
+  }
 }
 
 .skeleton-shimmer {
@@ -287,17 +341,33 @@ button {
   position: absolute;
   inset: 0;
   content: "";
-  background: linear-gradient(90deg, transparent, color-mix(in oklab, var(--card) 72%, transparent), transparent);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    color-mix(in oklab, var(--card) 72%, transparent),
+    transparent
+  );
   animation: skeleton-shimmer 1.45s ease-in-out infinite;
 }
 
 @keyframes loading-stripe {
-  from { background-position: 0 0; }
-  to { background-position: 24px 0; }
+  from {
+    background-position: 0 0;
+  }
+
+  to {
+    background-position: 24px 0;
+  }
 }
 
 .loading-stripe {
-  background-image: linear-gradient(110deg, var(--primary) 25%, color-mix(in oklab, var(--primary) 72%, var(--card)) 25% 50%, var(--primary) 50% 75%, color-mix(in oklab, var(--primary) 72%, var(--card)) 75%);
+  background-image: linear-gradient(
+    110deg,
+    var(--primary) 25%,
+    color-mix(in oklab, var(--primary) 72%, var(--card)) 25% 50%,
+    var(--primary) 50% 75%,
+    color-mix(in oklab, var(--primary) 72%, var(--card)) 75%
+  );
   background-size: 24px 100%;
   animation: loading-stripe 0.8s linear infinite;
 }
@@ -308,13 +378,26 @@ button {
 
 /* ===== Microfone ouvindo ===== */
 @keyframes voza-mic-onda {
-  0% { transform: scale(1); opacity: 0.55; }
-  100% { transform: scale(2.1); opacity: 0; }
+  0% {
+    transform: scale(1);
+    opacity: 0.55;
+  }
+
+  100% {
+    transform: scale(2.1);
+    opacity: 0;
+  }
 }
 
 @keyframes voza-mic-respira {
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.06); }
+  0%,
+  100% {
+    transform: scale(1);
+  }
+
+  50% {
+    transform: scale(1.06);
+  }
 }
 
 .voza-mic-ouvindo {
@@ -330,13 +413,23 @@ button {
   pointer-events: none;
 }
 
-.voza-mic-onda-2 { animation-delay: 0.6s; }
-.voza-mic-onda-3 { animation-delay: 1.2s; }
+.voza-mic-onda-2 {
+  animation-delay: 0.6s;
+}
+
+.voza-mic-onda-3 {
+  animation-delay: 1.2s;
+}
 
 /* ===== Barra de progresso ===== */
 @keyframes voza-progresso-brilho {
-  from { transform: translateX(-120%); }
-  to { transform: translateX(320%); }
+  from {
+    transform: translateX(-120%);
+  }
+
+  to {
+    transform: translateX(320%);
+  }
 }
 
 .voza-progresso-fill {
@@ -350,22 +443,51 @@ button {
   position: absolute;
   inset: 0;
   width: 35%;
-  background: linear-gradient(90deg, transparent, color-mix(in oklab, white 60%, transparent), transparent);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    color-mix(in oklab, white 60%, transparent),
+    transparent
+  );
   animation: voza-progresso-brilho 1.9s ease-in-out infinite;
 }
 
 /* ===== Feedback de sucesso ===== */
 @keyframes voza-sucesso-entra {
-  0% { transform: translateY(10px) scale(0.9); opacity: 0; }
-  18% { transform: translateY(0) scale(1.04); opacity: 1; }
-  30% { transform: translateY(0) scale(1); opacity: 1; }
-  82% { transform: translateY(0) scale(1); opacity: 1; }
-  100% { transform: translateY(-8px) scale(0.96); opacity: 0; }
+  0% {
+    transform: translateY(10px) scale(0.9);
+    opacity: 0;
+  }
+
+  18% {
+    transform: translateY(0) scale(1.04);
+    opacity: 1;
+  }
+
+  30% {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+
+  82% {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+
+  100% {
+    transform: translateY(-8px) scale(0.96);
+    opacity: 0;
+  }
 }
 
 @keyframes voza-check-traco {
-  from { stroke-dashoffset: 32; }
-  to { stroke-dashoffset: 0; }
+  from {
+    stroke-dashoffset: 32;
+  }
+
+  to {
+    stroke-dashoffset: 0;
+  }
 }
 
 .voza-sucesso {
@@ -376,7 +498,6 @@ button {
   stroke-dasharray: 32;
   animation: voza-check-traco 0.5s 0.12s cubic-bezier(0.65, 0, 0.35, 1) both;
 }
-
 
 /* ===== Marca DocFly — símbolo em movimento, discreto ===== */
 .docfly-marca {
@@ -411,31 +532,76 @@ button {
 }
 
 @keyframes docfly-voo {
-  0%, 100% { transform: translate3d(0, 0, 0); }
-  50% { transform: translate3d(1.2px, -1.4px, 0); }
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+
+  50% {
+    transform: translate3d(1.2px, -1.4px, 0);
+  }
 }
 
 @keyframes docfly-rastro {
-  0%, 100% { transform: translateX(0); opacity: 1; }
-  50% { transform: translateX(-2px); opacity: 0.65; }
+  0%,
+  100% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+
+  50% {
+    transform: translateX(-2px);
+    opacity: 0.65;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .animate-fade-in { animation: none; }
-  .animate-scale-in { animation: none; }
+  .animate-fade-in {
+    animation: none;
+  }
 
-  .animate-float { animation: none; }
+  .animate-scale-in {
+    animation: none;
+  }
+
+  .animate-float {
+    animation: none;
+  }
+
   .voza-mic-ouvindo,
   .voza-mic-onda,
   .voza-progresso-fill::after,
-  .voza-check-traco { animation: none; }
-  .voza-mic-onda { opacity: 0.2; }
-  .voza-sucesso { animation-duration: 0.01ms; opacity: 1; }
+  .voza-check-traco {
+    animation: none;
+  }
+
+  .voza-mic-onda {
+    opacity: 0.2;
+  }
+
+  .voza-sucesso {
+    animation-duration: 0.01ms;
+    opacity: 1;
+  }
 
   .skeleton-shimmer::after,
-  .loading-stripe { animation: none; }
-  .docfly-ponto { animation: none; }
-  body, header, main, article, section, input, button { transition: none; }
+  .loading-stripe {
+    animation: none;
+  }
+
+  .docfly-ponto {
+    animation: none;
+  }
+
+  body,
+  header,
+  main,
+  article,
+  section,
+  input,
+  button {
+    transition: none;
+  }
 }
 
 #lovable-badge {

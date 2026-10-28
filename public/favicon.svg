@@ -1,13 +1,11 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="48" height="48">
-  <rect width="48" height="48" rx="10" fill="#ffffff"/>
-  <g stroke="#dc2626" stroke-width="3.4" stroke-linecap="round">
-    <line x1="5" y1="17" x2="14" y2="17" opacity="0.95"/>
-    <line x1="7" y1="24" x2="13" y2="24" opacity="0.6"/>
-    <line x1="5" y1="31" x2="14" y2="31" opacity="0.85"/>
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 100 100">
+  <title>DocFly</title>
+  <rect width="100" height="100" rx="18" fill="#ffffff"/>
+  <g transform="translate(0 -2)">
+    <path d="M12 38h19M9 51h22M12 64h19" fill="none" stroke="#ef2938" stroke-width="6" stroke-linecap="round"/>
+    <path d="M40 20 73 15 92 33 90 65Q89 76 79 81L57 91 37 68Z" fill="#17191d"/>
+    <path d="M73 15 76 32Q77 38 85 38L92 33Z" fill="#ef2938"/>
+    <path d="M40 69Q53 88 71 81Q85 77 91 62Q78 78 61 75Q49 74 40 69Z" fill="#ef2938"/>
+    <path d="M39 67Q52 82 69 78" fill="none" stroke="#17191d" stroke-width="2.5" stroke-linecap="round"/>
   </g>
-  <g transform="rotate(-9 31 22)">
-    <path d="M24.5 10.5h13.2c1.6 0 2.9 1.3 2.9 2.9v16.4c0 1.6-1.3 2.9-2.9 2.9H24.5c-1.6 0-2.9-1.3-2.9-2.9V13.4c0-1.6 1.3-2.9 2.9-2.9Z" fill="#27272a"/>
-    <path d="M35 10.5h2.7c1.6 0 2.9 1.3 2.9 2.9v2.7L35 10.5Z" fill="#dc2626"/>
-  </g>
-  <path d="M16 38c8.5-1.4 17.5-5 27-11.6-3.4 8.6-10.6 13.7-21.4 15.1L16 38Z" fill="#dc2626"/>
 </svg>
